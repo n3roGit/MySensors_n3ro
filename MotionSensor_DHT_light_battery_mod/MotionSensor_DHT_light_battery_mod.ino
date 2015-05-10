@@ -5,7 +5,7 @@
 
 
 #define NODE_ID 11                       // ID of node
-unsigned long SLEEP_TIME = 600000;        // Sleep time between reports (in milliseconds)
+unsigned long SLEEP_TIME = 3600000;        // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // Id of the sensor PIR
 #define CHILD_ID_HUM 2                   // Id of the sensor HUM
@@ -30,6 +30,7 @@ float lastHum;
 boolean metric = true;
 int oldBatteryPcnt;
 int lastLightLevel;
+
 
 int MIN_V = 2700; // empty voltage (0%)
 int MAX_V = 3200; // full voltage (100%)
@@ -93,7 +94,7 @@ void loop()
 
 
   //DHT
-  delay(dht.getMinimumSamplingPeriod());
+  //delay(dht.getMinimumSamplingPeriod());
 
   float temperature = dht.getTemperature();
   if (isnan(temperature)) {

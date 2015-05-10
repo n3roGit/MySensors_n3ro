@@ -4,8 +4,8 @@
 #include <DHT.h>
 
 
-#define NODE_ID 10                       // ID of node
-unsigned long SLEEP_TIME = 10000;        // Sleep time between reports (in milliseconds)
+#define NODE_ID 11                       // ID of node
+unsigned long SLEEP_TIME = 600000;        // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // Id of the sensor PIR
 #define CHILD_ID_HUM 2                   // Id of the sensor HUM
@@ -127,5 +127,5 @@ void loop()
     Serial.println(lightLevel);
   }
   // Sleep until interrupt comes in on motion sensor. Send update every two minute.
-  gw.sleep(INTERRUPT, CHANGE, SLEEP_TIME);
+  gw.sleep(PIR_SENSOR_DIGITAL-2, CHANGE, SLEEP_TIME);
 }

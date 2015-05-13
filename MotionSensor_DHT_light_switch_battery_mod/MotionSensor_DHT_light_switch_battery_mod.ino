@@ -4,7 +4,7 @@
 #include <DHT.h>
 
 
-#define NODE_ID 10                       // ID of node
+#define NODE_ID 11                       // ID of node
 unsigned long SLEEP_TIME = 600000;        // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // Id of the sensor PIR
@@ -16,6 +16,10 @@ unsigned long SLEEP_TIME = 600000;        // Sleep time between reports (in mill
 #define INTERRUPT PIR_SENSOR_DIGITAL-2 // Usually the interrupt = pin -2 (on uno/nano anyway)
 #define HUMIDITY_SENSOR_DIGITAL_PIN 2
 #define LIGHT_SENSOR_ANALOG_PIN 0
+#define RELAY_1  4  // Arduino Digital I/O pin number for first relay (second on pin+1 etc)
+#define NUMBER_OF_RELAYS 1 // Total number of attached relays
+#define RELAY_ON 1  // GPIO value to write to turn on attached relay
+#define RELAY_OFF 0 // GPIO value to write to turn off attached relay
 
 MySensor gw;
 // Initialize Variables
@@ -47,7 +51,7 @@ void setup()
   digitalWrite(PIR_SENSOR_DIGITAL, HIGH);
   // Register all sensors to gw (they will be created as child devices)
   gw.present(CHILD_ID_PIR, S_MOTION);
-  
+
   //DHT
   dht.setup(HUMIDITY_SENSOR_DIGITAL_PIN);
 
@@ -59,13 +63,29 @@ void setup()
   gw.present(CHILD_ID_TEMP, S_TEMP);
 
   metric = gw.getConfig().isMetric;
-  
+
   //LIGHT
   // Send the sketch version information to the gateway and Controller
   gw.sendSketchInfo("Light Sensor", "1.0");
 
   // Register all sensors to gateway (they will be created as child devices)
   gw.present(CHILD_ID_LIGHT, S_LIGHT_LEVEL);
+
+  //SWITCH
+  // Initialize library and add callback for incoming messages
+  gw.begin(incomingMessage, AUTO, true);
+  // Send the sketch version information to the gateway and Controller
+  gw.sendSketchInfo("Relay", "1.0");
+
+  // Fetch relay status
+  for (int sensor = 1, pin = RELAY_1; sensor <= NUMBER_OF_RELAYS; sensor++, pin++) {
+    // Register all sensors to gw (they will be created as child devices)
+    gw.present(sensor, S_LIGHT);
+    // Then set relay pins in output mode
+    pinMode(pin, OUTPUT);
+    // Set relay to last known state (using eeprom storage)
+    digitalWrite(pin, gw.loadState(sensor) ? RELAY_ON : RELAY_OFF);
+  }
 
 }
 
@@ -83,12 +103,12 @@ void loop()
     gw.sendBatteryLevel(batteryPcnt); // Send battery percentage
     oldBatteryPcnt = batteryPcnt;
   }
-  Serial.print("---------- Battery: ");
+  Serial.print("Battery: ");
   Serial.println(batteryPcnt);
 
   // Read digital motion value
   boolean tripped = digitalRead(PIR_SENSOR_DIGITAL) == HIGH;
-  Serial.print("---------- PIR: ");
+  Serial.print("PIR: ");
   Serial.println(tripped);
   gw.send(msgPir.set(tripped ? "1" : "0")); // Send tripped value to gw
 
@@ -105,7 +125,7 @@ void loop()
       temperature = dht.toFahrenheit(temperature);
     }
     gw.send(msgTemp.set(temperature, 1));
-    Serial.print("---------- Temp: ");
+    Serial.print("Temp: ");
     Serial.println(temperature);
   }
 
@@ -115,7 +135,7 @@ void loop()
   } else if (humidity != lastHum) {
     lastHum = humidity;
     gw.send(msgHum.set(humidity, 1));
-    Serial.print("---------- Humidity: ");
+    Serial.print("Humidity: ");
     Serial.println(humidity);
   }
   // Light
@@ -124,9 +144,23 @@ void loop()
   if (lightLevel != lastLightLevel) {
     gw.send(msgLight.set(lightLevel));
     lastLightLevel = lightLevel;
-    Serial.print("---------- Light: ");
+    Serial.print("Light: ");
     Serial.println(lightLevel);
   }
   // Sleep until interrupt comes in on motion sensor. Send update every two minute.
-  gw.sleep(PIR_SENSOR_DIGITAL-2, CHANGE, SLEEP_TIME);
+  gw.sleep(PIR_SENSOR_DIGITAL - 2, CHANGE, SLEEP_TIME);
+}
+void incomingMessage(const MyMessage &message) {
+  // We only expect one type of message from controller. But we better check anyway.
+  if (message.type == V_LIGHT) {
+    // Change relay state
+    digitalWrite(message.sensor - 1 + RELAY_1, message.getBool() ? RELAY_ON : RELAY_OFF);
+    // Store state in eeprom
+    gw.saveState(message.sensor, message.getBool());
+    // Write some debug info
+    Serial.print("Incoming change for sensor:");
+    Serial.print(message.sensor);
+    Serial.print(", New status: ");
+    Serial.println(message.getBool());
+  }
 }

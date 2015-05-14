@@ -128,5 +128,5 @@ void loop()
     Serial.println(lightLevel);
   }
   // Sleep until interrupt comes in on motion sensor. Send update every two minute.
-  gw.sleep(PIR_SENSOR_DIGITAL-2, CHANGE, SLEEP_TIME);
+  gw.sleep(INTERRUPT, CHANGE, SLEEP_TIME);
 }

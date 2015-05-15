@@ -28,6 +28,7 @@ DHT dht;
 float lastTemp;
 float lastHum;
 boolean metric = true;
+boolean lastTripped = false;
 int oldBatteryPcnt;
 int lastLightLevel;
 
@@ -86,11 +87,15 @@ void loop()
   Serial.print("---------- Battery: ");
   Serial.println(batteryPcnt);
 
-  // Read digital motion value
+  // PIR
   boolean tripped = digitalRead(PIR_SENSOR_DIGITAL) == HIGH;
-  Serial.print("---------- PIR: ");
-  Serial.println(tripped);
-  gw.send(msgPir.set(tripped ? "1" : "0")); // Send tripped value to gw
+  if (tripped != lastTripped)  // only need to update controller on a change.
+  {
+    gw.send(msgPir.set(tripped ? "1" : "0"));
+    Serial.print("---------- PIR: ");
+    Serial.println(tripped ? "tripped" : " not tripped");
+    lastTripped = tripped;
+  }
 
 
   //DHT

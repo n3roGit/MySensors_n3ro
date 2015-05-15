@@ -5,7 +5,7 @@
 
 
 #define NODE_ID 10                       // ID of node
-unsigned long SLEEP_TIME = 600000;        // Sleep time between reports (in milliseconds)
+unsigned long SLEEP_TIME = 10000UL;        // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // Id of the sensor PIR
 #define CHILD_ID_HUM 2                   // Id of the sensor HUM
@@ -48,7 +48,7 @@ void setup()
   digitalWrite(PIR_SENSOR_DIGITAL, HIGH);
   // Register all sensors to gw (they will be created as child devices)
   gw.present(CHILD_ID_PIR, S_MOTION);
-  
+
   //DHT
   dht.setup(HUMIDITY_SENSOR_DIGITAL_PIN);
 
@@ -60,7 +60,7 @@ void setup()
   gw.present(CHILD_ID_TEMP, S_TEMP);
 
   metric = gw.getConfig().isMetric;
-  
+
   //LIGHT
   // Send the sketch version information to the gateway and Controller
   gw.sendSketchInfo("Light Sensor", "1.0");
@@ -83,9 +83,10 @@ void loop()
   if (batteryPcnt != oldBatteryPcnt) {
     gw.sendBatteryLevel(batteryPcnt); // Send battery percentage
     oldBatteryPcnt = batteryPcnt;
+    Serial.print("---------- Battery: ");
+    Serial.println(batteryPcnt);
   }
-  Serial.print("---------- Battery: ");
-  Serial.println(batteryPcnt);
+
 
   // PIR
   boolean tripped = digitalRead(PIR_SENSOR_DIGITAL) == HIGH;
@@ -133,5 +134,6 @@ void loop()
     Serial.println(lightLevel);
   }
   // Sleep until interrupt comes in on motion sensor. Send update every two minute.
+  Serial.println("new loop finished");
   gw.sleep(INTERRUPT, CHANGE, SLEEP_TIME);
 }

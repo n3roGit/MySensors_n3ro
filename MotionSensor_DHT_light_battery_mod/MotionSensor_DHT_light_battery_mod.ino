@@ -15,7 +15,7 @@
 #define HUMIDITY_SENSOR_DIGITAL_PIN 4    // DHT pin
 #define LIGHT_SENSOR_ANALOG_PIN 0        // LDR pin
 
-#define MIN_V 2700 // empty voltage (0%)
+#define MIN_V 2400 // empty voltage (0%)
 #define MAX_V 3200 // full voltage (100%)
 
 MySensor gw;
@@ -94,7 +94,6 @@ void sendPir() // Get value of PIR
 
 void sendTemp() // Get temperature
 {
-  delay(dht.getMinimumSamplingPeriod());
   //delay(dht.getMinimumSamplingPeriod());  // Use the delay if DHT cant read
   float temperature = dht.getTemperature();
   if (isnan(temperature)) {

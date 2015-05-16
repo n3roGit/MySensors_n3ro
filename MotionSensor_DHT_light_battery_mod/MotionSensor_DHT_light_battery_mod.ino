@@ -95,6 +95,7 @@ void sendPir() // Get value of PIR
 void sendTemp() // Get temperature
 {
   delay(dht.getMinimumSamplingPeriod());
+  //delay(dht.getMinimumSamplingPeriod());  // Use the delay if DHT cant read
   float temperature = dht.getTemperature();
   if (isnan(temperature)) {
     Serial.println("Failed reading temperature from DHT");
@@ -111,7 +112,7 @@ void sendTemp() // Get temperature
 
 void sendHum() // Get humidity
 {
-  //delay(dht.getMinimumSamplingPeriod());
+  //delay(dht.getMinimumSamplingPeriod()); // Use the delay if DHT cant read
   float humidity = dht.getHumidity();
   if (isnan(humidity)) {
     Serial.println("Failed reading humidity from DHT");

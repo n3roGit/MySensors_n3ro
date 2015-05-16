@@ -3,19 +3,20 @@
 #include <SPI.h>
 #include <DHT.h>
 
+#define NODE_ID 11                      // ID of node
+#define SLEEP_TIME 600000                 // Sleep time between reports (in milliseconds)
 
-#define NODE_ID 10                       // ID of node
-unsigned long SLEEP_TIME = 10000UL;        // Sleep time between reports (in milliseconds)
+#define CHILD_ID_PIR 1                   // ID of the sensor PIR
+#define CHILD_ID_HUM 2                   // ID of the sensor HUM
+#define CHILD_ID_TEMP 3                  // ID of the sensor TEMP
+#define CHILD_ID_LIGHT 4                 // ID of the sensor LIGHT
 
-#define CHILD_ID_PIR 1                   // Id of the sensor PIR
-#define CHILD_ID_HUM 2                   // Id of the sensor HUM
-#define CHILD_ID_TEMP 3                  // Id of the sensor TEMP
-#define CHILD_ID_LIGHT 4                 // Id of the sensor LIGHT
+#define PIR_SENSOR_DIGITAL 3             // PIR pin
+#define HUMIDITY_SENSOR_DIGITAL_PIN 4    // DHT pin
+#define LIGHT_SENSOR_ANALOG_PIN 0        // LDR pin
 
-#define PIR_SENSOR_DIGITAL 3           // The digital input you attached your motion sensor.  (Only 2 and 3 generates interrupt!)
-#define INTERRUPT PIR_SENSOR_DIGITAL-2 // Usually the interrupt = pin -2 (on uno/nano anyway)
-#define HUMIDITY_SENSOR_DIGITAL_PIN 2
-#define LIGHT_SENSOR_ANALOG_PIN 0
+#define MIN_V 2700 // empty voltage (0%)
+#define MAX_V 3200 // full voltage (100%)
 
 MySensor gw;
 // Initialize Variables
@@ -24,116 +25,116 @@ MyMessage msgHum(CHILD_ID_HUM, V_HUM);
 MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
 MyMessage msgLight(CHILD_ID_LIGHT, V_LIGHT_LEVEL);
 
+
+
 DHT dht;
 float lastTemp;
 float lastHum;
 boolean metric = true;
-boolean lastTripped = false;
 int oldBatteryPcnt;
 int lastLightLevel;
-
-
-int MIN_V = 2700; // empty voltage (0%)
-int MAX_V = 3200; // full voltage (100%)
+int sentValue;
 
 void setup()
 {
   gw.begin(NULL, NODE_ID, false);
 
-  //PIR
-  // Send the sketch version information to the gateway and Controller
-  gw.sendSketchInfo("Motion Sensor", "1.0");
-
-  pinMode(PIR_SENSOR_DIGITAL, INPUT);      // sets the motion sensor digital pin as input
-  digitalWrite(PIR_SENSOR_DIGITAL, HIGH);
-  // Register all sensors to gw (they will be created as child devices)
+  // Register all sensors to gateway (they will be created as child devices)
   gw.present(CHILD_ID_PIR, S_MOTION);
-
-  //DHT
-  dht.setup(HUMIDITY_SENSOR_DIGITAL_PIN);
-
-  // Send the Sketch Version Information to the Gateway
-  gw.sendSketchInfo("Humidity", "1.0");
-
-  // Register all sensors to gw (they will be created as child devices)
   gw.present(CHILD_ID_HUM, S_HUM);
   gw.present(CHILD_ID_TEMP, S_TEMP);
-
-  metric = gw.getConfig().isMetric;
-
-  //LIGHT
-  // Send the sketch version information to the gateway and Controller
-  gw.sendSketchInfo("Light Sensor", "1.0");
-
-  // Register all sensors to gateway (they will be created as child devices)
   gw.present(CHILD_ID_LIGHT, S_LIGHT_LEVEL);
 
+  pinMode(PIR_SENSOR_DIGITAL, INPUT);
+  digitalWrite(PIR_SENSOR_DIGITAL, HIGH);
+
+  dht.setup(HUMIDITY_SENSOR_DIGITAL_PIN);
 }
 
 void loop()
 {
+  Serial.println("Waking up...");
+  sendBattery();
+  sendPir();
+  sendTemp();
+  sendHum();
+  sendLight();
+  Serial.println("Going to sleep...");
+  Serial.println("");
+  gw.sleep(PIR_SENSOR_DIGITAL - 2, CHANGE, SLEEP_TIME);
+}
 
-  // Measure battery
-  float batteryV = readVcc();
-  int batteryPcnt = (((batteryV - MIN_V) / (MAX_V - MIN_V)) * 100 );
-  if (batteryPcnt > 100) {
-    batteryPcnt = 100;
-  }
 
+void sendBattery() // Measure battery
+{
+  int batteryPcnt = min(map(readVcc(), MIN_V, MAX_V, 0, 100), 100);
   if (batteryPcnt != oldBatteryPcnt) {
     gw.sendBatteryLevel(batteryPcnt); // Send battery percentage
     oldBatteryPcnt = batteryPcnt;
-    Serial.print("---------- Battery: ");
-    Serial.println(batteryPcnt);
   }
+  Serial.print("---------- Battery: ");
+  Serial.println(batteryPcnt);
+}
 
 
-  // PIR
-  boolean tripped = digitalRead(PIR_SENSOR_DIGITAL) == HIGH;
-  if (tripped != lastTripped)  // only need to update controller on a change.
-  {
-    gw.send(msgPir.set(tripped ? "1" : "0"));
-    Serial.print("---------- PIR: ");
-    Serial.println(tripped ? "tripped" : " not tripped");
-    lastTripped = tripped;
+
+void sendPir() // Get value of PIR
+{
+  int value = digitalRead(PIR_SENSOR_DIGITAL); // Get value of PIR
+  if (value != sentValue) { // If status of PIR has changed
+    gw.send(msgPir.set(value == HIGH ? 1 : 0)); // Send PIR status to gateway
+    sentValue = value;
   }
+  Serial.print("---------- PIR: ");
+  //Serial.println(value);
+  Serial.println(value ? "tripped" : "not tripped");
+}
 
 
-  //DHT
-  //delay(dht.getMinimumSamplingPeriod());
 
+void sendTemp() // Get temperature
+{
+  delay(dht.getMinimumSamplingPeriod());
   float temperature = dht.getTemperature();
   if (isnan(temperature)) {
     Serial.println("Failed reading temperature from DHT");
-  } else if (temperature != lastTemp) {
-    lastTemp = temperature;
-    if (!metric) {
-      temperature = dht.toFahrenheit(temperature);
+  } else {
+    if (temperature != lastTemp) {
+      gw.send(msgTemp.set(temperature, 1));
+      lastTemp = temperature;
     }
-    gw.send(msgTemp.set(temperature, 1));
     Serial.print("---------- Temp: ");
     Serial.println(temperature);
   }
+}
 
+
+void sendHum() // Get humidity
+{
+  //delay(dht.getMinimumSamplingPeriod());
   float humidity = dht.getHumidity();
   if (isnan(humidity)) {
     Serial.println("Failed reading humidity from DHT");
-  } else if (humidity != lastHum) {
-    lastHum = humidity;
-    gw.send(msgHum.set(humidity, 1));
+  } else {
+    if (humidity != lastHum) {
+      gw.send(msgHum.set(humidity, 1));
+      lastHum = humidity;
+    }
     Serial.print("---------- Humidity: ");
     Serial.println(humidity);
   }
-  // Light
+}
+
+
+void sendLight() // Get light level
+{
   int lightLevel = (1023 - analogRead(LIGHT_SENSOR_ANALOG_PIN)) / 10.23;
-  //Serial.println(lightLevel);
   if (lightLevel != lastLightLevel) {
     gw.send(msgLight.set(lightLevel));
     lastLightLevel = lightLevel;
-    Serial.print("---------- Light: ");
-    Serial.println(lightLevel);
   }
-  // Sleep until interrupt comes in on motion sensor. Send update every two minute.
-  Serial.println("new loop finished");
-  gw.sleep(INTERRUPT, CHANGE, SLEEP_TIME);
+  Serial.print("---------- Light: ");
+  Serial.println(lightLevel);
 }
+
+

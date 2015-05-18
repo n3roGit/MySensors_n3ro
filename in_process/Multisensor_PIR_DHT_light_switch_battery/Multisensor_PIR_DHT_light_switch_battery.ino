@@ -3,13 +3,14 @@
 #include <SPI.h>
 #include <DHT.h>
 
-#define NODE_ID 11                      // ID of node
+#define NODE_ID 10                      // ID of node
 #define SLEEP_TIME 60000                 // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // ID of the sensor PIR
 #define CHILD_ID_HUM 2                   // ID of the sensor HUM
 #define CHILD_ID_TEMP 3                  // ID of the sensor TEMP
 #define CHILD_ID_LIGHT 4                 // ID of the sensor LIGHT
+#define CHILD_ID_SWITCH 5                // ID of the sensor LIGHT
 
 #define PIR_SENSOR_DIGITAL 3             // PIR pin
 #define HUMIDITY_SENSOR_DIGITAL_PIN 4    // DHT pin
@@ -17,6 +18,7 @@
 
 #define MIN_V 2400 // empty voltage (0%)
 #define MAX_V 3200 // full voltage (100%)
+
 
 MySensor gw;
 // Initialize Variables
@@ -37,13 +39,14 @@ int sentValue;
 
 void setup()
 {
-  gw.begin(NULL, NODE_ID, false);
+  gw.begin(incomingMessage, NODE_ID, true);
 
   // Register all sensors to gateway (they will be created as child devices)
   gw.present(CHILD_ID_PIR, S_MOTION);
   gw.present(CHILD_ID_HUM, S_HUM);
   gw.present(CHILD_ID_TEMP, S_TEMP);
   gw.present(CHILD_ID_LIGHT, S_LIGHT_LEVEL);
+  gw.present(CHILD_ID_SWITCH, S_LIGHT);
 
   pinMode(PIR_SENSOR_DIGITAL, INPUT);
   digitalWrite(PIR_SENSOR_DIGITAL, HIGH);
@@ -53,16 +56,19 @@ void setup()
 
 void loop()
 {
-  Serial.println("Waking up...");
-  sendPir();
-  sendLight();
-  sendTemp();
-  sendHum();
-  sendBattery();
+  //Serial.println("Waking up...");
+  //sendPir();
+  //sendLight();
+  //sendTemp();
+  //sendHum();
+  //sendBattery();
 
-  Serial.println("Going to sleep...");
-  Serial.println("");
-  gw.sleep(PIR_SENSOR_DIGITAL - 2, CHANGE, SLEEP_TIME);
+  //Serial.println("Going to sleep...");
+  //Serial.println("");
+  //gw.sleep(PIR_SENSOR_DIGITAL - 2, CHANGE, SLEEP_TIME);
+  
+  
+  gw.process();
 }
 
 
@@ -135,6 +141,21 @@ void sendLight() // Get light level
   }
   Serial.print("---------- Light: ");
   Serial.println(lightLevel);
+}
+
+void incomingMessage(const MyMessage &message) {
+  // We only expect one type of message from controller. But we better check anyway.
+  //if (message.type == V_LIGHT) {
+    // Change relay state
+    //digitalWrite(message.CHILD_ID_SWITCH-1+RELAY_1, message.getBool()?RELAY_ON:RELAY_OFF);
+    // Store state in eeprom
+    //gw.saveState(message.CHILD_ID_SWITCH, message.getBool());
+    // Write some debug info
+    Serial.print("Incoming change for sensor:");
+    //Serial.print(message.CHILD_ID_SWITCH);
+    Serial.print(", New status: ");
+    Serial.println(message.getBool());
+  //}
 }
 
 

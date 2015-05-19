@@ -282,24 +282,25 @@ int  MQGetPercentage(float rs_ro_ratio, float *pcurve)
 
 void beep(boolean onoff) // Make BEEEEEEP
 {
+  Serial.print("---------- Beeper: ");
   if (onoff != lastBeep)
   {
     if (onoff == true)
     {
-      Serial.println("---------- Make some noise!!!");
+      Serial.println("ON");
       analogWrite(BEEP_SENSOR_ANALOG_PIN, 20);      // Almost any value can be used except 0 and 255
       lastBeep = true;
     }
     else
     {
-      Serial.println("---------- Be quite");
+      Serial.println("OFF");
       analogWrite(BEEP_SENSOR_ANALOG_PIN, 0);       // 0 turns it off
       lastBeep = false;
     }
   }
   else
   {
-    Serial.print("---------- Beeper: ");
+    
     Serial.println(onoff ? "still ON" : "still OFF");
   }
 }

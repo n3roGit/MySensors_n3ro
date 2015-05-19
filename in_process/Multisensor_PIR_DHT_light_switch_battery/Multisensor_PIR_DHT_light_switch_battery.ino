@@ -3,8 +3,8 @@
 #include <DHT.h>
 #include <Wire.h>
 
-#define NODE_ID 10                      // ID of node
-#define READ_TIME 10000                 // Sleep time between reports (in milliseconds)
+#define NODE_ID 10                       // ID of node
+#define READ_TIME 300000                 // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // ID of the sensor PIR
 #define CHILD_ID_HUM 2                   // ID of the sensor HUM
@@ -17,7 +17,7 @@
 #define PIR_SENSOR_DIGITAL 3             // PIR pin
 #define HUMIDITY_SENSOR_DIGITAL_PIN 4    // DHT pin
 #define LIGHT_SENSOR_ANALOG_PIN 0        // LDR pin
-#define BEEP_SENSOR_ANALOG_PIN 2        // BEEPER pin
+#define BEEP_SENSOR_ANALOG_PIN 2         // BEEPER pin
 
 // MQ Settings
 #define MQ_SENSOR_ANALOG_PIN 1           //define which analog input channel you are going to use
@@ -191,6 +191,10 @@ void incomingMessage(const MyMessage &message) //Turn Alarm on/off
     if (message.getBool() == false)
     {
       beep(false);
+    }
+    else
+    {
+      Serial.println("---------- Beeper: enabled");
     }
   }
 }

@@ -54,6 +54,7 @@ boolean metric = true;
 int lastLightLevel;
 int sentValue;
 unsigned long uptime;
+boolean lastBeep = false;
 
 float Ro = 10000.0;    // this has to be tuned 10K Ohm
 int val = 0;           // variable to store the value coming from the sensor
@@ -218,9 +219,13 @@ void sendMQ() // Get AirQuality Level
     gw.send(msgMQ.set((int)ceil(valMQ)));
     lastMQ = ceil(valMQ);
   }
-  if (MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_SMOKE) >= 100)
+  if (MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_SMOKE) >= 0)
   {
-    beep(50);
+    beep(true);
+  }
+  else
+  {
+    beep(false);
   }
 }
 float MQResistanceCalculation(int raw_adc)
@@ -275,14 +280,23 @@ int  MQGetPercentage(float rs_ro_ratio, float *pcurve)
   return (pow(10, ( ((log(rs_ro_ratio) - pcurve[1]) / pcurve[2]) + pcurve[0])));
 }
 
-void beep(unsigned char delayms) // Make BEEEEEEP
+void beep(boolean onoff) // Make BEEEEEEP
 {
-  Serial.print("Make some noise!!!");
-  analogWrite(BEEP_SENSOR_ANALOG_PIN, 20);      // Almost any value can be used except 0 and 255
-  // experiment to get the best tone
-  delay(delayms);          // wait for a delayms ms
-  analogWrite(BEEP_SENSOR_ANALOG_PIN, 0);       // 0 turns it off
-  delay(delayms);          // wait for a delayms ms
+  if (onoff != lastBeep)
+  {
+    if (onoff == true)
+    {
+      Serial.println("---------- Make some noise!!!");
+      analogWrite(BEEP_SENSOR_ANALOG_PIN, 20);      // Almost any value can be used except 0 and 255
+      lastBeep = true;
+    }
+    else
+    {
+      Serial.println("---------- Be quite");
+      analogWrite(BEEP_SENSOR_ANALOG_PIN, 0);       // 0 turns it off
+      lastBeep = false;
+    }
+  }
 }
 
 

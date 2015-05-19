@@ -219,7 +219,7 @@ void sendMQ() // Get AirQuality Level
     gw.send(msgMQ.set((int)ceil(valMQ)));
     lastMQ = ceil(valMQ);
   }
-  if (MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_SMOKE) >= 0)
+  if (MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_SMOKE) >= 100)
   {
     beep(true);
   }
@@ -296,6 +296,11 @@ void beep(boolean onoff) // Make BEEEEEEP
       analogWrite(BEEP_SENSOR_ANALOG_PIN, 0);       // 0 turns it off
       lastBeep = false;
     }
+  }
+  else
+  {
+    Serial.print("---------- Beeper: ");
+    Serial.println(onoff ? "still ON" : "still OFF");
   }
 }
 

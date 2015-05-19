@@ -44,7 +44,7 @@ MyMessage msgHum(CHILD_ID_HUM, V_HUM);
 MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
 MyMessage msgLight(CHILD_ID_LIGHT, V_LIGHT_LEVEL);
 MyMessage msgMQ(CHILD_ID_MQ, V_VAR1);
-
+MyMessage msgSwitch(CHILD_ID_SWITCH,V_LIGHT);
 
 
 DHT dht;
@@ -77,7 +77,7 @@ float           SmokeCurve[3] = {2.3, 0.53, -0.44}; //two points are taken from 
 
 void setup()
 {
-  gw.begin(incomingMessage, NODE_ID, true);
+  gw.begin(setSwitchState, NODE_ID, true);
 
   gw.sendSketchInfo("PIR,DHT,Light,MQ,Alarm", "1.0");
   // Register all sensors to gateway (they will be created as child devices)
@@ -97,11 +97,13 @@ void setup()
   //when you perform the calibration
 
   pinMode(BEEP_SENSOR_ANALOG_PIN, OUTPUT);
-
+  
+  gw.send(msgSwitch.set(true),true);
 }
 
 void loop()
 {
+   gw.process();
   if ( millis() - uptime >= READ_TIME )  //use UNSIGNED SUBRTACTION im your millis() timers to avoid rollover issues later on down the line
   {
     Serial.println("Reading Sensors...");
@@ -118,7 +120,11 @@ void loop()
     uptime = millis();
   }
   sendPir();
-  gw.process();
+  getSwitchState();
+  
+
+  
+ 
 }
 
 
@@ -182,8 +188,9 @@ void sendLight() // Get light level
   Serial.println(lightLevel);
 }
 
-void incomingMessage(const MyMessage &message) //Turn Alarm on/off
+void setSwitchState(const MyMessage &message) //Turn Alarm on/off
 {
+
   // We only expect one type of message from controller. But we better check anyway.
   if (message.type == V_LIGHT)
   {
@@ -195,8 +202,14 @@ void incomingMessage(const MyMessage &message) //Turn Alarm on/off
     else
     {
       Serial.println("---------- Beeper: enabled");
+      //gw.send(msgSwitch.set(message.getBool()?false:true), true);
+      //gw.send(msgSwitch.set(true));
     }
   }
+}
+void getSwitchState()
+{
+ gw.read(msgSwitch.get(message.getBool()));
 }
 
 void sendMQ() // Get AirQuality Level

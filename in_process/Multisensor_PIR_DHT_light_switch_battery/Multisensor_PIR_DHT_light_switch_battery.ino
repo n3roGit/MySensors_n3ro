@@ -55,6 +55,7 @@ int lastLightLevel;
 int sentValue;
 unsigned long uptime;
 boolean lastBeep = false;
+boolean beepState = true;
 
 float Ro = 10000.0;    // this has to be tuned 10K Ohm
 int val = 0;           // variable to store the value coming from the sensor
@@ -184,18 +185,10 @@ void sendLight() // Get light level
 void incomingMessage(const MyMessage &message) //Turn Alarm on/off
 {
   // We only expect one type of message from controller. But we better check anyway.
-  //if (message.type == V_LIGHT) {
-  // Change relay state
-  //digitalWrite(message.CHILD_ID_SWITCH-1+RELAY_1, message.getBool()?RELAY_ON:RELAY_OFF);
-  // Store state in eeprom
-  //gw.saveState(message.CHILD_ID_SWITCH, message.getBool());
-  // Write some debug info
-  Serial.print("Incoming change for sensor:");
-  //Serial.print(message.CHILD_ID_SWITCH);
-  Serial.print(", New status: ");
-  Serial.println(message.getBool());
-  //}
-  // HERE I NEED A VARIABLE TO DISABLE THE BEEPER
+  if (message.type == V_LIGHT)
+  {
+    beepState = message.getBool();
+  }
 }
 
 void sendMQ() // Get AirQuality Level
@@ -283,25 +276,34 @@ int  MQGetPercentage(float rs_ro_ratio, float *pcurve)
 void beep(boolean onoff) // Make BEEEEEEP
 {
   Serial.print("---------- Beeper: ");
-  if (onoff != lastBeep)
+  if (beepState == true)
   {
-    if (onoff == true)
+    if (onoff != lastBeep)
     {
-      Serial.println("ON");
-      analogWrite(BEEP_SENSOR_ANALOG_PIN, 20);      // Almost any value can be used except 0 and 255
-      lastBeep = true;
+      if (onoff == true)
+      {
+        Serial.println("ON");
+        analogWrite(BEEP_SENSOR_ANALOG_PIN, 20);      // Almost any value can be used except 0 and 255
+        lastBeep = true;
+      }
+      else
+      {
+        Serial.println("OFF");
+        analogWrite(BEEP_SENSOR_ANALOG_PIN, 0);       // 0 turns it off
+        lastBeep = false;
+      }
     }
     else
     {
-      Serial.println("OFF");
-      analogWrite(BEEP_SENSOR_ANALOG_PIN, 0);       // 0 turns it off
-      lastBeep = false;
+
+      Serial.println(onoff ? "still ON" : "still OFF");
     }
   }
   else
   {
-    
-    Serial.println(onoff ? "still ON" : "still OFF");
+    Serial.println("disabled");
+    analogWrite(BEEP_SENSOR_ANALOG_PIN, 0);       // 0 turns it off
+    lastBeep = false;
   }
 }
 

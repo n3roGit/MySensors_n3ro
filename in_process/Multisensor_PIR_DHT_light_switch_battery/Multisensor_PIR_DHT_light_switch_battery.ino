@@ -188,6 +188,10 @@ void incomingMessage(const MyMessage &message) //Turn Alarm on/off
   if (message.type == V_LIGHT)
   {
     beepState = message.getBool();
+    if (message.getBool() == false)
+    {
+      beep(false);
+    }
   }
 }
 

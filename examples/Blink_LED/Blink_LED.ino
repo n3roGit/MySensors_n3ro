@@ -33,8 +33,10 @@ void led(boolean onoff, int blink, int time) // LED Signal
   else
   {
     if (time == 0) {time = 100;}
-    Serial.print("Blink "+blink);
-    Serial.println(" Delay  "+time);
+    Serial.print("Blink ");
+    Serial.print(blink);
+    Serial.print(" Delay ");
+    Serial.println(time);
     for (int count = 0; count < blink; count++)
     {
       digitalWrite(LED_PIN, LOW);      // turn on
@@ -44,7 +46,4 @@ void led(boolean onoff, int blink, int time) // LED Signal
     }
   }
 }
-
-
-
 

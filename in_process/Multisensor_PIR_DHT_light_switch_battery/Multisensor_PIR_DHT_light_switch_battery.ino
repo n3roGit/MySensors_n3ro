@@ -44,7 +44,7 @@ MyMessage msgHum(CHILD_ID_HUM, V_HUM);
 MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
 MyMessage msgLight(CHILD_ID_LIGHT, V_LIGHT_LEVEL);
 MyMessage msgMQ(CHILD_ID_MQ, V_VAR1);
-MyMessage msgSwitch(CHILD_ID_SWITCH,V_LIGHT);
+MyMessage msgSwitch(CHILD_ID_SWITCH, V_LIGHT);
 
 
 DHT dht;
@@ -77,7 +77,7 @@ float           SmokeCurve[3] = {2.3, 0.53, -0.44}; //two points are taken from 
 
 void setup()
 {
-  gw.begin(setSwitchState, NODE_ID, true);
+  gw.begin(incomingMessage, NODE_ID, true);
 
   gw.sendSketchInfo("PIR,DHT,Light,MQ,Alarm", "1.0");
   // Register all sensors to gateway (they will be created as child devices)
@@ -97,13 +97,13 @@ void setup()
   //when you perform the calibration
 
   pinMode(BEEP_SENSOR_ANALOG_PIN, OUTPUT);
-  
-  gw.send(msgSwitch.set(true),true);
+
+  gw.send(msgSwitch.set(true), true); // Set Beeper enabled in GW
 }
 
 void loop()
 {
-   gw.process();
+  gw.process();
   if ( millis() - uptime >= READ_TIME )  //use UNSIGNED SUBRTACTION im your millis() timers to avoid rollover issues later on down the line
   {
     Serial.println("Reading Sensors...");
@@ -120,11 +120,8 @@ void loop()
     uptime = millis();
   }
   sendPir();
-  getSwitchState();
-  
+  //getSwitchState();
 
-  
- 
 }
 
 
@@ -188,9 +185,8 @@ void sendLight() // Get light level
   Serial.println(lightLevel);
 }
 
-void setSwitchState(const MyMessage &message) //Turn Alarm on/off
+void incomingMessage(const MyMessage &message) //Turn Alarm on/off
 {
-
   // We only expect one type of message from controller. But we better check anyway.
   if (message.type == V_LIGHT)
   {
@@ -202,15 +198,15 @@ void setSwitchState(const MyMessage &message) //Turn Alarm on/off
     else
     {
       Serial.println("---------- Beeper: enabled");
-      //gw.send(msgSwitch.set(message.getBool()?false:true), true);
-      //gw.send(msgSwitch.set(true));
     }
   }
 }
-void getSwitchState()
+/*
+void getSwitchState(const MyMessage &message)
 {
- gw.read(msgSwitch.get(message.getBool()));
+  gw.read(msgSwitch.get(message.getBool()));
 }
+*/
 
 void sendMQ() // Get AirQuality Level
 {
@@ -250,7 +246,6 @@ float MQCalibration(int mq_pin)
 {
   int i;
   float val = 0;
-
   for (i = 0; i < CALIBARAION_SAMPLE_TIMES; i++) {      //take multiple samples
     val += MQResistanceCalculation(analogRead(mq_pin));
     delay(CALIBRATION_SAMPLE_INTERVAL);
@@ -259,7 +254,6 @@ float MQCalibration(int mq_pin)
 
   val = val / RO_CLEAN_AIR_FACTOR;                      //divided by RO_CLEAN_AIR_FACTOR yields the Ro
   //according to the chart in the datasheet
-
   return val;
 }
 float MQRead(int mq_pin)
@@ -271,9 +265,7 @@ float MQRead(int mq_pin)
     rs += MQResistanceCalculation(analogRead(mq_pin));
     delay(READ_SAMPLE_INTERVAL);
   }
-
   rs = rs / READ_SAMPLE_TIMES;
-
   return rs;
 }
 
@@ -316,7 +308,6 @@ void beep(boolean onoff) // Make BEEEEEEP
     }
     else
     {
-
       Serial.println(onoff ? "still ON" : "still OFF");
     }
   }

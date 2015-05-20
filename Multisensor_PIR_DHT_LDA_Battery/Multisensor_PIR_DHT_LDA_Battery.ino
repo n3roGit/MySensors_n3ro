@@ -4,7 +4,7 @@
 #include <DHT.h>
 
 #define NODE_ID 11                      // ID of node
-#define SLEEP_TIME 60000                 // Sleep time between reports (in milliseconds)
+#define SLEEP_TIME 300000                 // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // ID of the sensor PIR
 #define CHILD_ID_HUM 2                   // ID of the sensor HUM
@@ -14,6 +14,7 @@
 #define PIR_SENSOR_DIGITAL 3             // PIR pin
 #define HUMIDITY_SENSOR_DIGITAL_PIN 4    // DHT pin
 #define LIGHT_SENSOR_ANALOG_PIN 0        // LDR pin
+#define LED_PIN A1                       // LED connected PIN 
 
 #define MIN_V 2400 // empty voltage (0%)
 #define MAX_V 3200 // full voltage (100%)
@@ -39,6 +40,7 @@ void setup()
 {
   gw.begin(NULL, NODE_ID, false);
 
+  gw.sendSketchInfo("PIR,DHT,Light", "1.0");
   // Register all sensors to gateway (they will be created as child devices)
   gw.present(CHILD_ID_PIR, S_MOTION);
   gw.present(CHILD_ID_HUM, S_HUM);
@@ -49,6 +51,8 @@ void setup()
   digitalWrite(PIR_SENSOR_DIGITAL, HIGH);
 
   dht.setup(HUMIDITY_SENSOR_DIGITAL_PIN);
+  
+  led(true,3,100);
 }
 
 void loop()
@@ -137,4 +141,37 @@ void sendLight() // Get light level
   Serial.println(lightLevel);
 }
 
+void led(boolean onoff, int blink, int time) // LED Signal
+{
+  pinMode(LED_PIN, OUTPUT);      // sets the pin as output
+  Serial.print("---------- LED: ");
+  if (blink == 0)
+  {
+    if (onoff == true)
+    {
+      Serial.println("ON");
+      digitalWrite(LED_PIN, LOW);      // turn on
+    }
+    else
+    {
+      Serial.println("OFF");
+      digitalWrite(LED_PIN, HIGH);       // turn off
+    }
+  }
+  else
+  {
+    if (time == 0) {time = 100;}
+    Serial.print("Blink ");
+    Serial.print(blink);
+    Serial.print(" Delay ");
+    Serial.println(time);
+    for (int count = 0; count < blink; count++)
+    {
+      digitalWrite(LED_PIN, LOW);      // turn on
+      delay(time);
+      digitalWrite(LED_PIN, HIGH);       // turn off
+      delay(time);
+    }
+  }
+}
 

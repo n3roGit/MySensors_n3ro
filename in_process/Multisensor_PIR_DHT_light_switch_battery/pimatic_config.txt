@@ -1,13 +1,13 @@
     {
       "id": "node20switch",
-      "name": "Küche - Alarm",
+      "name": "node20switch",
       "class": "MySensorsSwitch",
       "nodeid": 20,
       "sensorid": 5
     },
 	    {
       "id": "node20dht",
-      "name": "Küche",
+      "name": "node20dht",
       "class": "MySensorsDHT",
       "batterySensor": false,
       "nodeid": 20,
@@ -18,7 +18,7 @@
     },
 	    {
       "id": "node20light",
-      "name": "Küche",
+      "name": "node20light",
       "class": "MySensorsLight",
       "nodeid": 20,
       "batterySensor": false,
@@ -26,7 +26,7 @@
     },
 	{
       "id": "node20pir",
-      "name": "Küche",
+      "name": "node20pir",
       "class": "MySensorsPIR",
       "nodeid": 20,
       "sensorid": 1,
@@ -34,7 +34,7 @@
     },
 	  {
       "id": "node20gas",
-      "name": "Küche",
+      "name": "node20gas",
       "class": "MySensorsGas",
       "nodeid": 20,
       "batterySensor": false,

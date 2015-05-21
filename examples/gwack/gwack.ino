@@ -10,6 +10,10 @@
 MySensor gw;
 MyMessage msg(CHILD_ID, V_TRIPPED);
 
+int repeat = 0;
+boolean sendOK = false;
+int repeatdelay=0;
+
 void setup()
 {
   gw.begin(NULL, NODE_ID, false);
@@ -19,18 +23,29 @@ void setup()
 
 void loop()
 {
-//gw.send(msg.set(OPEN));
-  gwresend("msg.set","OPEN");
-  delay(500);
+  while ((sendOK == false) and (repeat < 10)) {
+    if (gw.send(msg.set(OPEN))) {
+      sendOK = true;
+    } else {
+      sendOK = false;
+      Serial.print("FEHLER ");
+      Serial.println(repeat);
+      repeatdelay+=100;
+    } repeat++;delay(repeatdelay);
+  } repeat = 0; sendOK = false;
+
+  delay(2000); // Wait 10 seconds
 }
-void gwresend(char msgcode[],char option[])
+/*
+void gwack(char code[])
 {
   int repeat = 0;
   boolean sendOK = false;
+  Serial.println(code);
 
   while ((sendOK == false) or (repeat <= 10))
   {
-    if (gw.send(msgcode(option)) // execute code
+    if (1 == 1)
     {
       Serial.println("OK");
       sendOK = true;
@@ -43,3 +58,4 @@ void gwresend(char msgcode[],char option[])
     repeat++;
   }
 }
+*/

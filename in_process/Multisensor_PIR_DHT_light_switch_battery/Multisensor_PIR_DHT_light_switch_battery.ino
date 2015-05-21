@@ -3,21 +3,22 @@
 #include <DHT.h>
 #include <Wire.h>
 
-#define NODE_ID 10                       // ID of node
-#define READ_TIME 300000                 // Sleep time between reports (in milliseconds)
+#define NODE_ID 20                       // ID of node
+#define READ_TIME 60000                 // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // ID of the sensor PIR
 #define CHILD_ID_HUM 2                   // ID of the sensor HUM
 #define CHILD_ID_TEMP 3                  // ID of the sensor TEMP
 #define CHILD_ID_LIGHT 4                 // ID of the sensor LIGHT
 #define CHILD_ID_SWITCH 5                // ID of the sensor SWITCH
-#define CHILD_ID_MQ 6
+#define CHILD_ID_MQ 6                    // ID of the sensor MQ
 
 
 #define PIR_SENSOR_DIGITAL 3             // PIR pin
 #define HUMIDITY_SENSOR_DIGITAL_PIN 4    // DHT pin
-#define LIGHT_SENSOR_ANALOG_PIN 0        // LDR pin
-#define BEEP_SENSOR_ANALOG_PIN 2         // BEEPER pin
+#define LIGHT_SENSOR_ANALOG_PIN A0       // LDR pin
+#define BEEP_SENSOR_ANALOG_PIN A2        // BEEPER pin
+#define LED_PIN A1                       // LED connected pin
 
 // MQ Settings
 #define MQ_SENSOR_ANALOG_PIN 1           //define which analog input channel you are going to use
@@ -99,6 +100,8 @@ void setup()
   pinMode(BEEP_SENSOR_ANALOG_PIN, OUTPUT);
 
   gw.send(msgSwitch.set(true), true); // Set Beeper enabled in GW
+
+  led(true, 3, 100);
 }
 
 void loop()
@@ -107,12 +110,12 @@ void loop()
   if ( millis() - uptime >= READ_TIME )  //use UNSIGNED SUBRTACTION im your millis() timers to avoid rollover issues later on down the line
   {
     Serial.println("Reading Sensors...");
-
+    led(true, 0, 0);
     sendLight();
     sendTemp();
     sendHum();
     sendMQ();
-
+    led(false, 0, 0);
     Serial.println("Finished with reading Sensors...");
     Serial.println("");
 
@@ -134,6 +137,7 @@ void sendPir() // Get value of PIR
     sentValue = value;
     Serial.print("---------- PIR: ");
     Serial.println(value ? "tripped" : "not tripped");
+    led(true, 1, 0);
   }
 
 }
@@ -319,4 +323,39 @@ void beep(boolean onoff) // Make BEEEEEEP
   }
 }
 
+void led(boolean onoff, int blink, int time) // LED Signal
+{
+  pinMode(LED_PIN, OUTPUT);      // sets the pin as output
+  Serial.print("---------- LED: ");
+  if (blink == 0)
+  {
+    if (onoff == true)
+    {
+      Serial.println("ON");
+      digitalWrite(LED_PIN, LOW);      // turn on
+    }
+    else
+    {
+      Serial.println("OFF");
+      digitalWrite(LED_PIN, HIGH);       // turn off
+    }
+  }
+  else
+  {
+    if (time == 0) {
+      time = 100;
+    }
+    Serial.print("Blink ");
+    Serial.print(blink);
+    Serial.print(" Delay ");
+    Serial.println(time);
+    for (int count = 0; count < blink; count++)
+    {
+      digitalWrite(LED_PIN, LOW);      // turn on
+      delay(time);
+      digitalWrite(LED_PIN, HIGH);       // turn off
+      delay(time);
+    }
+  }
+}
 

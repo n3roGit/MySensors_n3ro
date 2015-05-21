@@ -19,18 +19,18 @@ void setup()
 
 void loop()
 {
-  gwack("gw.send(msg.set(OPEN));");
+//gw.send(msg.set(OPEN));
+  gwresend("msg.set","OPEN");
   delay(500);
 }
-void gwack(char code[])
+void gwresend(char msgcode[],char option[])
 {
   int repeat = 0;
   boolean sendOK = false;
-  Serial.println(code); // string to execute
 
   while ((sendOK == false) or (repeat <= 10))
   {
-    if (code) // execute code
+    if (gw.send(msgcode(option)) // execute code
     {
       Serial.println("OK");
       sendOK = true;

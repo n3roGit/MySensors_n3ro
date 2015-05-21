@@ -1,0 +1,27 @@
+    {
+      "id": "node20dht",
+      "name": "node20dht",
+      "class": "MySensorsDHT",
+      "batterySensor": false,
+      "nodeid": 20,
+      "sensorid": [
+        2,
+        3
+      ]
+    },
+	    {
+      "id": "node20light",
+      "name": "node20light",
+      "class": "MySensorsLight",
+      "nodeid": 20,
+      "batterySensor": false,
+      "sensorid": 4
+    },
+	{
+      "id": "node20pir",
+      "name": "node20pir",
+      "class": "MySensorsPIR",
+      "nodeid": 20,
+      "sensorid": 1,
+      "resetTime": 30000
+    }

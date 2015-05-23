@@ -35,6 +35,7 @@ boolean metric = true;
 int oldBatteryPcnt;
 int lastLightLevel;
 int sentValue;
+int repeat = 10;
 
 void setup()
 {
@@ -87,7 +88,8 @@ void sendPir() // Get value of PIR
 {
   int value = digitalRead(PIR_SENSOR_DIGITAL); // Get value of PIR
   if (value != sentValue) { // If status of PIR has changed
-    gw.send(msgPir.set(value == HIGH ? 1 : 0)); // Send PIR status to gateway
+    //gw.send(msgPir.set(value == HIGH ? 1 : 0)); // Send PIR status to gateway
+    resend((msgPir.set(value == HIGH ? 1 : 0)),repeat);
     sentValue = value;
   }
   Serial.print("---------- PIR: ");
@@ -104,7 +106,8 @@ void sendTemp() // Get temperature
     Serial.println("Failed reading temperature from DHT");
   } else {
     if (temperature != lastTemp) {
-      gw.send(msgTemp.set(temperature, 1));
+      //gw.send(msgTemp.set(temperature, 1));
+      resend((msgTemp.set(temperature, 1)),repeat);
       lastTemp = temperature;
     }
     Serial.print("---------- Temp: ");
@@ -121,7 +124,8 @@ void sendHum() // Get humidity
     Serial.println("Failed reading humidity from DHT");
   } else {
     if (humidity != lastHum) {
-      gw.send(msgHum.set(humidity, 1));
+      //gw.send(msgHum.set(humidity, 1));
+      resend((msgHum.set(humidity, 1)),repeat);
       lastHum = humidity;
     }
     Serial.print("---------- Humidity: ");
@@ -134,7 +138,8 @@ void sendLight() // Get light level
 {
   int lightLevel = (1023 - analogRead(LIGHT_SENSOR_ANALOG_PIN)) / 10.23;
   if (lightLevel != lastLightLevel) {
-    gw.send(msgLight.set(lightLevel));
+    //gw.send(msgLight.set(lightLevel));
+    resend((msgLight.set(lightLevel)),repeat);
     lastLightLevel = lightLevel;
   }
   Serial.print("---------- Light: ");
@@ -172,6 +177,24 @@ void led(boolean onoff, int blink, int time) // LED Signal
       digitalWrite(LED_PIN, HIGH);       // turn off
       delay(time);
     }
+  }
+}
+
+void resend(MyMessage &msg, int repeats)
+{
+  int repeat = 1;
+  int repeatdelay = 0;
+  boolean sendOK = false;
+
+  while ((sendOK == false) and (repeat < repeats)) {
+    if (gw.send(msg)) {
+      sendOK = true;
+    } else {
+      sendOK = false;
+      Serial.print("Send ERROR ");
+      Serial.println(repeat);
+      repeatdelay += 250;
+    } repeat++; delay(repeatdelay);
   }
 }
 

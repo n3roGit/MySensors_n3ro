@@ -24,12 +24,11 @@ void setup()
 void loop()
 {
   resend(msg.set(OPEN), 5);
-
 }
 void resend(MyMessage &msg, int repeats)
 {
   int repeat = 1;
-  int repeatdelay = 1;
+  int repeatdelay = 0;
   boolean sendOK = false;
 
   while ((sendOK == false) and (repeat < repeats)) {

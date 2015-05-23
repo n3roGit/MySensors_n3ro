@@ -57,7 +57,7 @@ int sentValue;
 unsigned long uptime;
 boolean lastBeep = false;
 boolean beepState = true;
-int retry = 5;
+int retry = 10;
 
 float Ro = 10000.0;    // this has to be tuned 10K Ohm
 int val = 0;           // variable to store the value coming from the sensor

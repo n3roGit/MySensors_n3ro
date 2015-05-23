@@ -24,6 +24,7 @@ void setup()
 void loop()
 {
   resend(msg.set(OPEN), 5);
+  delay(500);
 }
 void resend(MyMessage &msg, int repeats)
 {
@@ -36,7 +37,7 @@ void resend(MyMessage &msg, int repeats)
       sendOK = true;
     } else {
       sendOK = false;
-      Serial.print("FEHLER ");
+      Serial.print("Send ERROR ");
       Serial.println(repeat);
       repeatdelay += 100;
     } repeat++; delay(repeatdelay);

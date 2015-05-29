@@ -21,7 +21,7 @@
 #define LED_PIN A1                       // LED connected pin
 
 // MQ Settings
-#define MQ_SENSOR_ANALOG_PIN 1           //define which analog input channel you are going to use
+#define MQ_SENSOR_ANALOG_PIN A3           //define which analog input channel you are going to use
 #define RL_VALUE 5                       //define the load resistance on the board, in kilo ohms
 #define RO_CLEAN_AIR_FACTOR 9.83         //RO_CLEAR_AIR_FACTOR=(Sensor resistance in clean air)/RO,
 //which is derived from the chart in datasheet
@@ -112,20 +112,15 @@ void loop()
   if ( millis() - uptime >= READ_TIME )  //use UNSIGNED SUBRTACTION im your millis() timers to avoid rollover issues later on down the line
   {
     Serial.println("Reading Sensors...");
-    led(true, 0, 0);
     sendLight();
     sendTemp();
     sendHum();
     sendMQ();
-    led(false, 0, 0);
     Serial.println("Finished with reading Sensors...");
     Serial.println("");
-
-
     uptime = millis();
   }
   sendPir();
-  //getSwitchState();
 
 }
 
@@ -140,7 +135,6 @@ void sendPir() // Get value of PIR
     sentValue = value;
     Serial.print("---------- PIR: ");
     Serial.println(value ? "tripped" : "not tripped");
-    led(true, 1, 0);
   }
 
 }
@@ -211,12 +205,6 @@ void incomingMessage(const MyMessage &message) //Turn Alarm on/off
     }
   }
 }
-/*
-void getSwitchState(const MyMessage &message)
-{
-  gw.read(msgSwitch.get(message.getBool()));
-}
-*/
 
 void sendMQ() // Get AirQuality Level
 {
@@ -379,6 +367,7 @@ void resend(MyMessage &msg, int repeats)
       Serial.print("Send ERROR ");
       Serial.println(repeat);
       repeatdelay += 250;
+      led(true, 1, 5);
     } repeat++; delay(repeatdelay);
   }
 }

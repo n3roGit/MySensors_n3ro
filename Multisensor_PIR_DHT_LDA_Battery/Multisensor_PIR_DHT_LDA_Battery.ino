@@ -15,8 +15,9 @@
 #define HUMIDITY_SENSOR_DIGITAL_PIN 4    // DHT pin
 #define LIGHT_SENSOR_ANALOG_PIN 0        // LDR pin
 #define LED_PIN A1                       // LED connected PIN 
+#define STEPUP_PIN 6                     // StepUp Transistor 
 
-#define MIN_V 2400 // empty voltage (0%)
+#define MIN_V 1900 // empty voltage (0%)
 #define MAX_V 3200 // full voltage (100%)
 
 MySensor gw;
@@ -59,11 +60,13 @@ void setup()
 void loop()
 {
   Serial.println("Waking up...");
+  stepup(true);
   sendPir();
   sendLight();
   sendTemp();
   sendHum();
   sendBattery();
+  stepup(false);
 
   Serial.println("Going to sleep...");
   Serial.println("");
@@ -194,7 +197,24 @@ void resend(MyMessage &msg, int repeats)
       Serial.print("Send ERROR ");
       Serial.println(repeat);
       repeatdelay += 250;
+      led(true,1,5);
     } repeat++; delay(repeatdelay);
+  }
+}
+
+void stepup(boolean onoff)
+{
+  pinMode(STEPUP_PIN, OUTPUT);      // sets the pin as output
+  Serial.print("---------- StepUp: ");
+  if (onoff == true)
+  {
+    Serial.println("ON");
+    digitalWrite(STEPUP_PIN, HIGH);      // turn on
+  }
+  else
+  {
+    Serial.println("OFF");
+    digitalWrite(STEPUP_PIN, LOW);       // turn off
   }
 }
 

@@ -4,5 +4,5 @@
   "class": "MySensorsPIR",
   "nodeid": 21,
   "sensorid": 1,
-  "resetTime": 9999999
+  "autoReset": false
 }

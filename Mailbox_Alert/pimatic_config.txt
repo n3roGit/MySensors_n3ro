@@ -1,0 +1,8 @@
+{
+  "id": "node21mail",
+  "name": "node21mail",
+  "class": "MySensorsPIR",
+  "nodeid": 21,
+  "sensorid": 1,
+  "resetTime": 9999999
+}

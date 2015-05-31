@@ -70,7 +70,7 @@ void loop()
     Serial.println("---------- New Mail");
   }
 
-  if ((digitalRead(MAILBOX_BACK_PIN)) == 0)
+  if ((digitalRead(MAILBOX_BACK_PIN)) == 1)
   {
     post = false;
     Serial.println("---------- Mailbox emptied");

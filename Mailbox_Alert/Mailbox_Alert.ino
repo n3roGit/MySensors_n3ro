@@ -48,6 +48,9 @@ void setup()
   gw.sendSketchInfo("Mailbox Alert", "1.0");
 
   gw.present(CHILD_ID, S_MOTION);
+  
+  Serial.println("set Mailbox empty");
+  resend(msg.set(0), repeat);
 
 }
 
@@ -64,7 +67,7 @@ void loop()
   if ((digitalRead(MAILBOX_FRONT_PIN)) == 0)
   {
     post = true;
-    Serial.println("New Post");
+    Serial.println("New Mail");
   }
 
   if ((digitalRead(MAILBOX_BACK_PIN)) == 0)
@@ -75,12 +78,12 @@ void loop()
   
   if (post != lastpost)
   {
-    //resend((msg.set(post ? "1" : "0")),repeat);
-    resend((msg.set(post == HIGH ? 1 : 0)),repeat);
+    Serial.print("Send Mailboxstate ");
+    Serial.println(post ? "full" : "empty");
+    resend((msg.set(post ? "1" : "0")),repeat);
     lastpost = post;
+    sendBattery();
   }
-  
-  sendBattery();
   
   // Sleep until something happens with the sensor
   gw.sleep(MAILBOX_FRONT_PIN - 2, CHANGE, MAILBOX_BACK_PIN - 2, CHANGE, 0);

@@ -49,7 +49,7 @@ void setup()
 
   gw.present(CHILD_ID, S_MOTION);
   
-  Serial.println("set Mailbox empty");
+  Serial.println("---------- set Mailbox empty");
   resend(msg.set(0), repeat);
 
 }
@@ -67,18 +67,18 @@ void loop()
   if ((digitalRead(MAILBOX_FRONT_PIN)) == 0)
   {
     post = true;
-    Serial.println("New Mail");
+    Serial.println("---------- New Mail");
   }
 
   if ((digitalRead(MAILBOX_BACK_PIN)) == 0)
   {
     post = false;
-    Serial.println("Mailbox emptied");
+    Serial.println("---------- Mailbox emptied");
   }
   
   if (post != lastpost)
   {
-    Serial.print("Send Mailboxstate ");
+    Serial.print("---------- Send Mailboxstate ");
     Serial.println(post ? "full" : "empty");
     resend((msg.set(post ? "1" : "0")),repeat);
     lastpost = post;

@@ -30,6 +30,7 @@
       "class": "MySensorsPIR",
       "nodeid": 20,
       "sensorid": 1,
+	  "batterySensor": false,
       "resetTime": 30000
     },
 	  {
@@ -40,3 +41,45 @@
       "batterySensor": false,
       "sensorid": 6
   },
+  {
+      "id": "node20",
+      "name": "Küche ALL",
+      "class": "VariablesDevice",
+      "variables": [
+        {
+          "name": "Temperatur",
+          "expression": "$node20dht.temperature",
+          "unit": "°C",
+          "label": "Temperatur",
+          "type": "number"
+        },
+        {
+          "name": "Luftfeuchtigkeit",
+          "expression": "$node20dht.humidity",
+          "unit": "%",
+          "label": "Luftfeuchtigkeit",
+          "type": "number"
+        },
+        {
+          "name": "Licht",
+          "expression": "$node20light.light",
+          "unit": "%",
+          "label": "Licht",
+          "type": "number"
+        },
+		{
+          "name": "Gas",
+          "expression": "$node20gas.gas",
+          "unit": "%",
+          "label": "Gas",
+          "type": "number"
+        },
+        {
+          "name": "PIR",
+          "expression": "$node20pir.presence",
+          "unit": "",
+          "label": "PIR",
+          "type": "string"
+        }
+      ]
+    }

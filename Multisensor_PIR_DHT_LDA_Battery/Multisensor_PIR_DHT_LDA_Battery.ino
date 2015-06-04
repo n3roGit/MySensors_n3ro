@@ -40,6 +40,7 @@ int repeat = 10;
 
 void setup()
 {
+  stepup(true);
   gw.begin(NULL, NODE_ID, false);
 
   gw.sendSketchInfo("PIR,DHT,Light", "1.0");
@@ -55,6 +56,7 @@ void setup()
   dht.setup(HUMIDITY_SENSOR_DIGITAL_PIN);
   
   led(true,3,100);
+  stepup(false);
 }
 
 void loop()

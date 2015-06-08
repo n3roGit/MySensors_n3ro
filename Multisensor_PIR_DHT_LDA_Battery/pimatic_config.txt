@@ -1,8 +1,8 @@
     {
-      "id": "node20dht",
-      "name": "node20dht",
+      "id": "node22dht",
+      "name": "Wohnzimmer",
       "class": "MySensorsDHT",
-      "batterySensor": false,
+      "batterySensor": true,
       "nodeid": 20,
       "sensorid": [
         2,
@@ -10,16 +10,16 @@
       ]
     },
 	    {
-      "id": "node20light",
-      "name": "node20light",
+      "id": "node22light",
+      "name": "Wohnzimmer",
       "class": "MySensorsLight",
       "nodeid": 20,
       "batterySensor": false,
       "sensorid": 4
     },
 	{
-      "id": "node20pir",
-      "name": "node20pir",
+      "id": "node22pir",
+      "name": "Wohnzimmer",
       "class": "MySensorsPIR",
       "nodeid": 20,
       "sensorid": 1,

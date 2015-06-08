@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <DHT.h>
 
-#define NODE_ID 11                      // ID of node
+#define NODE_ID 22                      // ID of node
 #define SLEEP_TIME 300000                 // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // ID of the sensor PIR
@@ -72,7 +72,7 @@ void loop()
 
   Serial.println("Going to sleep...");
   Serial.println("");
-  gw.sleep(PIR_SENSOR_DIGITAL - 2, CHANGE, SLEEP_TIME);
+  gw.sleep(PIR_SENSOR_DIGITAL - 2, RISING, SLEEP_TIME);
 }
 
 
@@ -105,7 +105,7 @@ void sendPir() // Get value of PIR
 
 void sendTemp() // Get temperature
 {
-  //delay(dht.getMinimumSamplingPeriod());  // Use the delay if DHT cant read
+  delay(dht.getMinimumSamplingPeriod());  // Use the delay if DHT cant read
   float temperature = dht.getTemperature();
   if (isnan(temperature)) {
     Serial.println("Failed reading temperature from DHT");

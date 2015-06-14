@@ -17,7 +17,7 @@
 #define PIR_SENSOR_DIGITAL 3             // PIR pin
 #define HUMIDITY_SENSOR_DIGITAL_PIN 4    // DHT pin
 #define LIGHT_SENSOR_ANALOG_PIN A0       // LDR pin
-#define BEEP_SENSOR_ANALOG_PIN A2        // BEEPER pin
+#define BEEP_PIN 7                // BEEPER pin
 #define LED_PIN A1                       // LED connected pin
 
 // MQ Settings
@@ -36,6 +36,7 @@
 #define         GAS_LPG                      (0)
 #define         GAS_CO                       (1)
 #define         GAS_SMOKE                    (2)
+#define ENABLE_ALARM_TIME 7200000              // Reenable Alarm after 2h
 
 
 MySensor gw;
@@ -55,6 +56,7 @@ boolean metric = true;
 int lastLightLevel;
 int sentValue;
 unsigned long uptime;
+unsigned long uptime2;
 boolean lastBeep = false;
 boolean beepState = true;
 int repeat = 10;
@@ -98,7 +100,6 @@ void setup()
   Ro = MQCalibration(MQ_SENSOR_ANALOG_PIN);         //Calibrating the sensor. Please make sure the sensor is in clean air
   //when you perform the calibration
 
-  pinMode(BEEP_SENSOR_ANALOG_PIN, OUTPUT);
 
   //gw.send(msgSwitch.set(true), true); // Set Beeper enabled in GW
   resend(msgSwitch.set(true), repeat);
@@ -120,6 +121,13 @@ void loop()
     Serial.println("");
     uptime = millis();
   }
+  if ( millis() - uptime2 >= ENABLE_ALARM_TIME and beepState == false )  //use UNSIGNED SUBRTACTION im your millis() timers to avoid rollover issues later on down the line
+  {
+    Serial.println("reenable Alarm");
+    resend(msgSwitch.set(true), repeat);
+    beep(true, 3, 100);
+    uptime2 = millis();
+  }
   sendPir();
 
 }
@@ -131,7 +139,7 @@ void sendPir() // Get value of PIR
   int value = digitalRead(PIR_SENSOR_DIGITAL); // Get value of PIR
   if (value != sentValue) { // If status of PIR has changed
     //gw.send(msgPir.set(value == HIGH ? 1 : 0)); // Send PIR status to gateway
-    resend((msgPir.set(value == HIGH ? 1 : 0)),repeat);
+    resend((msgPir.set(value == HIGH ? 1 : 0)), repeat);
     sentValue = value;
     Serial.print("---------- PIR: ");
     Serial.println(value ? "tripped" : "not tripped");
@@ -150,7 +158,7 @@ void sendTemp() // Get temperature
   } else {
     if (temperature != lastTemp) {
       //gw.send(msgTemp.set(temperature, 1));
-      resend((msgTemp.set(temperature, 1)),repeat);
+      resend((msgTemp.set(temperature, 1)), repeat);
       lastTemp = temperature;
     }
     Serial.print("---------- Temp: ");
@@ -168,7 +176,7 @@ void sendHum() // Get humidity
   } else {
     if (humidity != lastHum) {
       //gw.send(msgHum.set(humidity, 1));
-      resend((msgHum.set(humidity, 1)),repeat);
+      resend((msgHum.set(humidity, 1)), repeat);
       lastHum = humidity;
     }
     Serial.print("---------- Humidity: ");
@@ -182,7 +190,7 @@ void sendLight() // Get light level
   int lightLevel = (1023 - analogRead(LIGHT_SENSOR_ANALOG_PIN)) / 10.23;
   if (lightLevel != lastLightLevel) {
     //gw.send(msgLight.set(lightLevel));
-    resend((msgLight.set(lightLevel)),repeat);
+    resend((msgLight.set(lightLevel)), repeat);
     lastLightLevel = lightLevel;
   }
   Serial.print("---------- Light: ");
@@ -195,13 +203,15 @@ void incomingMessage(const MyMessage &message) //Turn Alarm on/off
   if (message.type == V_LIGHT)
   {
     beepState = message.getBool();
-    if (message.getBool() == false)
+    if (beepState == false)
     {
-      beep(false);
+      beep(false, 0, 0);
+      beep(true, 2, 100);
     }
     else
     {
       Serial.println("---------- Beeper: enabled");
+      beep(true, 2, 100);
     }
   }
 }
@@ -225,16 +235,16 @@ void sendMQ() // Get AirQuality Level
   if (valMQ != lastMQ)
   {
     //gw.send(msgMQ.set((int)ceil(valMQ)));
-    resend((msgMQ.set((int)ceil(valMQ))),repeat);
+    resend((msgMQ.set((int)ceil(valMQ))), repeat);
     lastMQ = ceil(valMQ);
   }
-  if (MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_SMOKE) >= 100)
+  if (MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_SMOKE) >= 100 and beepState == true)
   {
-    beep(true);
+    beep(true, 0, 0);
   }
   else
   {
-    beep(false);
+    beep(false, 0, 0);
   }
 }
 float MQResistanceCalculation(int raw_adc)
@@ -285,36 +295,39 @@ int  MQGetPercentage(float rs_ro_ratio, float *pcurve)
   return (pow(10, ( ((log(rs_ro_ratio) - pcurve[1]) / pcurve[2]) + pcurve[0])));
 }
 
-void beep(boolean onoff) // Make BEEEEEEP
+void beep(boolean onoff, int repeat, int time) // Beep Signal
 {
-  Serial.print("---------- Beeper: ");
-  if (beepState == true)
+  pinMode(BEEP_PIN, OUTPUT);      // sets the pin as output
+  Serial.print("---------- BEEPER: ");
+  if (repeat == 0)
   {
-    if (onoff != lastBeep)
+    if (onoff == true)
     {
-      if (onoff == true)
-      {
-        Serial.println("ON");
-        analogWrite(BEEP_SENSOR_ANALOG_PIN, 20);      // Almost any value can be used except 0 and 255
-        lastBeep = true;
-      }
-      else
-      {
-        Serial.println("OFF");
-        analogWrite(BEEP_SENSOR_ANALOG_PIN, 0);       // 0 turns it off
-        lastBeep = false;
-      }
+      Serial.println("ON");
+      digitalWrite(BEEP_PIN, HIGH);      // turn on
     }
     else
     {
-      Serial.println(onoff ? "still ON" : "still OFF");
+      Serial.println("OFF");
+      digitalWrite(BEEP_PIN, LOW);       // turn off
     }
   }
   else
   {
-    Serial.println("disabled");
-    analogWrite(BEEP_SENSOR_ANALOG_PIN, 0);       // 0 turns it off
-    lastBeep = false;
+    if (time == 0) {
+      time = 100;
+    }
+    Serial.print("Beep ");
+    Serial.print(repeat);
+    Serial.print(" Delay ");
+    Serial.println(time);
+    for (int count = 0; count < repeat; count++)
+    {
+      digitalWrite(BEEP_PIN, HIGH);      // turn on
+      delay(time);
+      digitalWrite(BEEP_PIN, LOW);       // turn off
+      delay(time);
+    }
   }
 }
 

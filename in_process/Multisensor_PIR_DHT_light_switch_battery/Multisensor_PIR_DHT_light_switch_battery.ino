@@ -36,7 +36,7 @@
 #define         GAS_LPG                      (0)
 #define         GAS_CO                       (1)
 #define         GAS_SMOKE                    (2)
-#define ENABLE_ALARM_TIME 7200000              // Reenable Alarm after 2h
+#define ENABLE_ALARM_TIME  7200000              // Reenable Alarm after 2h
 
 
 MySensor gw;
@@ -56,8 +56,7 @@ boolean metric = true;
 int lastLightLevel;
 int sentValue;
 unsigned long uptime;
-unsigned long uptime2;
-boolean lastBeep = false;
+unsigned long alarmtimer;
 boolean beepState = true;
 int repeat = 10;
 
@@ -121,12 +120,12 @@ void loop()
     Serial.println("");
     uptime = millis();
   }
-  if ( millis() - uptime2 >= ENABLE_ALARM_TIME and beepState == false )  //use UNSIGNED SUBRTACTION im your millis() timers to avoid rollover issues later on down the line
+  if ( millis() - alarmtimer >= ENABLE_ALARM_TIME and beepState == false )  //use UNSIGNED SUBRTACTION im your millis() timers to avoid rollover issues later on down the line
   {
-    Serial.println("reenable Alarm");
+    Serial.println("---------- BEEPER: enabled after Timeout");
     resend(msgSwitch.set(true), repeat);
+    beepState = true;
     beep(true, 3, 100);
-    uptime2 = millis();
   }
   sendPir();
 
@@ -205,13 +204,15 @@ void incomingMessage(const MyMessage &message) //Turn Alarm on/off
     beepState = message.getBool();
     if (beepState == false)
     {
+      Serial.println("---------- BEEPER: disabled");
       beep(false, 0, 0);
       beep(true, 2, 100);
+      alarmtimer = millis();
     }
     else
     {
-      Serial.println("---------- Beeper: enabled");
-      beep(true, 2, 100);
+      Serial.println("---------- BEEPER: enabled");
+      beep(true, 2, 200);
     }
   }
 }
@@ -240,10 +241,12 @@ void sendMQ() // Get AirQuality Level
   }
   if (MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_SMOKE) >= 100 and beepState == true)
   {
+    Serial.println("---------- Starting Alarm");
     beep(true, 0, 0);
   }
   else
   {
+    Serial.println("---------- Stopping Alarm");
     beep(false, 0, 0);
   }
 }

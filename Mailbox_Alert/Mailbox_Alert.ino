@@ -29,7 +29,7 @@ MyMessage msg(CHILD_ID, V_TRIPPED);
 
 boolean post = false;
 boolean lastpost = false;
-int oldBatteryPcnt;;
+int oldBatteryPcnt;
 int repeat = 20;
 
 void setup()

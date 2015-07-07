@@ -4,7 +4,7 @@
 #include <Wire.h>
 
 #define NODE_ID 20                       // ID of node
-#define READ_TIME 60000                 // Sleep time between reports (in milliseconds)
+#define READ_TIME 6000                 // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // ID of the sensor PIR
 #define CHILD_ID_HUM 2                   // ID of the sensor HUM
@@ -21,7 +21,7 @@
 #define LED_PIN A1                       // LED connected pin
 
 // MQ Settings
-#define MQ_SENSOR_ANALOG_PIN A3           //define which analog input channel you are going to use
+#define MQ_SENSOR_ANALOG_PIN A2           //define which analog input channel you are going to use
 #define RL_VALUE 5                       //define the load resistance on the board, in kilo ohms
 #define RO_CLEAN_AIR_FACTOR 9.83         //RO_CLEAR_AIR_FACTOR=(Sensor resistance in clean air)/RO,
 //which is derived from the chart in datasheet
@@ -219,8 +219,8 @@ void incomingMessage(const MyMessage &message) //Turn Alarm on/off
 
 void sendMQ() // Get AirQuality Level
 {
-  //uint16_t valMQ = MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_CO);
-  //Serial.println(val);
+  uint16_t valMQ = MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_CO);
+  Serial.println(val);
 
   Serial.print("---------- LPG: ");
   Serial.print(MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_LPG) );
@@ -233,12 +233,13 @@ void sendMQ() // Get AirQuality Level
   Serial.println( "ppm" );
 
 
-  if (valMQ != lastMQ)
-  {
+  //if (valMQ != lastMQ)
+  //{
     //gw.send(msgMQ.set((int)ceil(valMQ)));
     resend((msgMQ.set((int)ceil(valMQ))), repeat);
+     resend((msgMQ.set((int)ceil((MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_SMOKE)))), repeat);
     lastMQ = ceil(valMQ);
-  }
+  //}
   if (MQGetGasPercentage(MQRead(MQ_SENSOR_ANALOG_PIN) / Ro, GAS_SMOKE) >= 100 and beepState == true)
   {
     Serial.println("---------- Starting Alarm");

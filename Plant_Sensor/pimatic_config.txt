@@ -1,0 +1,16 @@
+	{
+      "id": "node23Moisturelvl",
+      "name": "Bonsai",
+      "class": "MySensorsLight",
+      "nodeid": 23,
+      "batterySensor": false,
+      "sensorid": 1
+    },
+	{
+      "id": "node23Moisture",
+      "name": "Bonsai",
+      "class": "MySensorsPIR",
+      "nodeid": 23,
+      "sensorid": 2,
+      "autoReset": false
+    }

@@ -5,7 +5,7 @@
 #define DIGITAL_INPUT_SOIL_SENSOR 3   // Digital input did you attach your soil sensor.  
 #define ANALOG_INPUT_LEAFWETNESS_SENSOR 0   // Digital input did you attach your soil sensor.
 
-#define CHILD_ID_Digital 0   // Id of the sensor child
+#define CHILD_ID_Digital 2   // Id of the sensor child
 #define CHILD_ID_Analog 1   // Id of the sensor child
 #define NODE_ID 23                      // ID of node
 
@@ -13,7 +13,7 @@
 #define MAX_V 3200 // full voltage (100%)
 
 MySensor gw;
-unsigned long SLEEP_TIME = 5 * 1000; // sleep time between reads (seconds * 1000 milliseconds)
+unsigned long SLEEP_TIME = 1 * 60000; // sleep time between reads 
 MyMessage msgDigital(CHILD_ID_Digital, V_TRIPPED);
 MyMessage msgAnalog(CHILD_ID_Analog, V_LIGHT_LEVEL);
 int lastSoilValue = -1;
@@ -26,7 +26,7 @@ void setup()
   gw.begin(NULL, NODE_ID, false);
 
   // Send the sketch version information to the gateway and Controller
-  gw.sendSketchInfo("Soil Moisture Sensor", "1.0");
+  gw.sendSketchInfo("Plant Sensor", "1.0");
   // sets the soil sensor digital pin as input
   pinMode(DIGITAL_INPUT_SOIL_SENSOR, INPUT);
   // Register all sensors to gw (they will be created as child devices)
@@ -51,26 +51,34 @@ void readMoistureDigital()
 {
   // Read digital soil value
   int soilValue = digitalRead(DIGITAL_INPUT_SOIL_SENSOR); // 1 = Not triggered, 0 = In soil with water
-  if (soilValue != lastSoilValue) {
+  if (soilValue != lastSoilValue) 
+  {
     resend(msgDigital.set(soilValue == 0 ? 1 : 0), repeat);
     lastSoilValue = soilValue;
-    Serial.print("---------- Moisture : ");
-    Serial.println(soilValue ? "dry" : "wet");
-
   }
+  Serial.print("---------- Moisture : ");
+  Serial.println(soilValue ? "dry" : "wet");
 }
 
 void readMoistureAnalog()
 {
   // Read analog soil value
-  int soilValueAnalog = ((float)analogRead(ANALOG_INPUT_LEAFWETNESS_SENSOR) * 100 / 1023);
-  if (soilValueAnalog != lastsoilValueAnalog) {
-    Serial.println(soilValueAnalog);
+  //int soilValueAnalog = ((float)analogRead(ANALOG_INPUT_LEAFWETNESS_SENSOR) * 100 / 1023);
+  int soilValueAnalog = analogRead(ANALOG_INPUT_LEAFWETNESS_SENSOR);
+  soilValueAnalog = map(soilValueAnalog,0,1024,100,0);
+  //int soilValueAnalogtest = ((float)analogRead(ANALOG_INPUT_LEAFWETNESS_SENSOR));
+  
+  if (soilValueAnalog != lastsoilValueAnalog) 
+  {
     resend(msgAnalog.set(soilValueAnalog), repeat);  // Send the inverse to gw as tripped should be when no water in soil
     lastsoilValueAnalog = soilValueAnalog;
-    Serial.print("---------- Moisture level : ");
-    Serial.println(soilValueAnalog);
   }
+  Serial.print("---------- Moisture level : ");
+  Serial.println(soilValueAnalog);
+
+  
+  //Serial.println(soilValueAnalogtest);
+  
 }
 
 void resend(MyMessage &msg, int repeats)

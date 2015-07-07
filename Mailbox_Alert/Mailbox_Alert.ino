@@ -64,7 +64,7 @@ void loop()
   // Short delay to allow buttons to properly settle
   gw.sleep(5);
 
-  if ((digitalRead(MAILBOX_FRONT_PIN)) == 0)
+  if ((digitalRead(MAILBOX_FRONT_PIN)) == 1)
   {
     post = true;
     Serial.println("---------- New Mail");

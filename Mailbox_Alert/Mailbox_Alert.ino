@@ -41,8 +41,8 @@ void setup()
   pinMode(MAILBOX_BACK_PIN, INPUT);
 
   // Activate internal pull-ups
-  digitalWrite(MAILBOX_FRONT_PIN, HIGH);
-  digitalWrite(MAILBOX_BACK_PIN, HIGH);
+  //digitalWrite(MAILBOX_FRONT_PIN, HIGH);
+  //digitalWrite(MAILBOX_BACK_PIN, HIGH);
 
   // Send the sketch version information to the gateway and Controller
   gw.sendSketchInfo("Mailbox Alert", "1.0");

@@ -2,24 +2,23 @@
 #include <MySensor.h>
 #include <readVcc.h>
 
-#define DIGITAL_INPUT_SOIL_SENSOR 3   // Digital input did you attach your soil sensor.  
-#define ANALOG_INPUT_LEAFWETNESS_SENSOR 0   // Digital input did you attach your soil sensor.
+#define ANALOG_INPUT_MOISTURE 0   // Digital input did you attach your soil sensor.
 
-#define CHILD_ID_Digital 2   // Id of the sensor child
-#define CHILD_ID_Analog 1   // Id of the sensor child
-#define NODE_ID 23                      // ID of node
+#define STEPUP_PIN 2                     // StepUp Transistor 
+#define CHILD_ID_Analog 0                   // Id of the sensor child
+#define NODE_ID 23                          // ID of node
 
-#define MIN_V 1900 // empty voltage (0%)
-#define MAX_V 3200 // full voltage (100%)
+#define MIN_V 1900                          // empty voltage (0%)
+#define MAX_V 3200                          // full voltage (100%)
 
 MySensor gw;
-unsigned long SLEEP_TIME = 1 * 60000; // sleep time between reads 
-MyMessage msgDigital(CHILD_ID_Digital, V_TRIPPED);
+unsigned long SLEEP_TIME = 30 * 60000;       // sleep time between reads
+
 MyMessage msgAnalog(CHILD_ID_Analog, V_LIGHT_LEVEL);
-int lastSoilValue = -1;
+
 int lastsoilValueAnalog = -1;
 int oldBatteryPcnt;
-int repeat = 1;
+int repeat = 20;
 
 void setup()
 {
@@ -27,58 +26,54 @@ void setup()
 
   // Send the sketch version information to the gateway and Controller
   gw.sendSketchInfo("Plant Sensor", "1.0");
-  // sets the soil sensor digital pin as input
-  pinMode(DIGITAL_INPUT_SOIL_SENSOR, INPUT);
+
   // Register all sensors to gw (they will be created as child devices)
-  gw.present(CHILD_ID_Analog, S_MOTION);
-  gw.present(CHILD_ID_Digital, S_LIGHT_LEVEL);
+  gw.present(CHILD_ID_Analog, S_LIGHT_LEVEL);
 }
 
 void loop()
 {
   Serial.println("Waking up...");
-
-  readMoistureDigital();
+  stepup(true);
+  delay(50);
   readMoistureAnalog();
-
+  stepup(false);
+  sendBattery();
 
   Serial.println("Going to sleep...");
   Serial.println("");
-  gw.sleep(DIGITAL_INPUT_SOIL_SENSOR - 2, CHANGE, SLEEP_TIME);
+  gw.sleep(SLEEP_TIME);
 }
 
-void readMoistureDigital()
+void stepup(boolean onoff)
 {
-  // Read digital soil value
-  int soilValue = digitalRead(DIGITAL_INPUT_SOIL_SENSOR); // 1 = Not triggered, 0 = In soil with water
-  if (soilValue != lastSoilValue) 
+  pinMode(STEPUP_PIN, OUTPUT);      // sets the pin as output
+  Serial.print("---------- StepUp: ");
+  if (onoff == true)
   {
-    resend(msgDigital.set(soilValue == 0 ? 1 : 0), repeat);
-    lastSoilValue = soilValue;
+    Serial.println("ON");
+    digitalWrite(STEPUP_PIN, LOW);      // turn on
   }
-  Serial.print("---------- Moisture : ");
-  Serial.println(soilValue ? "dry" : "wet");
+  else
+  {
+    Serial.println("OFF");
+    digitalWrite(STEPUP_PIN, HIGH);     // turn off
+  }
 }
 
 void readMoistureAnalog()
 {
   // Read analog soil value
-  //int soilValueAnalog = ((float)analogRead(ANALOG_INPUT_LEAFWETNESS_SENSOR) * 100 / 1023);
-  int soilValueAnalog = analogRead(ANALOG_INPUT_LEAFWETNESS_SENSOR);
-  soilValueAnalog = map(soilValueAnalog,0,1024,100,0);
-  //int soilValueAnalogtest = ((float)analogRead(ANALOG_INPUT_LEAFWETNESS_SENSOR));
-  
-  if (soilValueAnalog != lastsoilValueAnalog) 
+  int soilValueAnalog = analogRead(ANALOG_INPUT_MOISTURE);
+  soilValueAnalog = map(soilValueAnalog, 0, 1024, 100, 0);
+
+  if (soilValueAnalog != lastsoilValueAnalog)
   {
     resend(msgAnalog.set(soilValueAnalog), repeat);  // Send the inverse to gw as tripped should be when no water in soil
     lastsoilValueAnalog = soilValueAnalog;
   }
   Serial.print("---------- Moisture level : ");
   Serial.println(soilValueAnalog);
-
-  
-  //Serial.println(soilValueAnalogtest);
-  
 }
 
 void resend(MyMessage &msg, int repeats)

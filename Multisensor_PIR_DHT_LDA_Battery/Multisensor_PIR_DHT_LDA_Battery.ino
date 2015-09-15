@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <DHT.h>
 
-#define NODE_ID 22                      // ID of node
+#define NODE_ID 24                      // ID of node
 #define SLEEP_TIME 300000                 // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // ID of the sensor PIR
@@ -16,6 +16,7 @@
 #define LIGHT_SENSOR_ANALOG_PIN 0        // LDR pin
 #define LED_PIN A1                       // LED connected PIN 
 #define STEPUP_PIN 6                     // StepUp Transistor 
+#define STEPUP_PIN2 7                     // StepUp Transistor
 
 #define MIN_V 1900 // empty voltage (0%)
 #define MAX_V 3200 // full voltage (100%)
@@ -51,7 +52,7 @@ void setup()
   gw.present(CHILD_ID_LIGHT, S_LIGHT_LEVEL);
 
   pinMode(PIR_SENSOR_DIGITAL, INPUT);
-  digitalWrite(PIR_SENSOR_DIGITAL, HIGH);
+  //digitalWrite(PIR_SENSOR_DIGITAL, HIGH);
 
   dht.setup(HUMIDITY_SENSOR_DIGITAL_PIN);
   
@@ -207,16 +208,19 @@ void resend(MyMessage &msg, int repeats)
 void stepup(boolean onoff)
 {
   pinMode(STEPUP_PIN, OUTPUT);      // sets the pin as output
+  pinMode(STEPUP_PIN2, OUTPUT);      // sets the pin as output
   Serial.print("---------- StepUp: ");
   if (onoff == true)
   {
     Serial.println("ON");
     digitalWrite(STEPUP_PIN, HIGH);      // turn on
+    digitalWrite(STEPUP_PIN2, LOW);      // turn on
   }
   else
   {
     Serial.println("OFF");
     digitalWrite(STEPUP_PIN, LOW);       // turn off
+    digitalWrite(STEPUP_PIN2, HIGH);       // turn off
   }
 }
 

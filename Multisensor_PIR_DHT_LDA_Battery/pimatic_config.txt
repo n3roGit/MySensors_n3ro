@@ -1,27 +1,78 @@
     {
-      "id": "node22dht",
-      "name": "Wohnzimmer",
+      "id": "node24dht",
+      "name": "Luft",
       "class": "MySensorsDHT",
-      "batterySensor": true,
-      "nodeid": 20,
+      "batterySensor": false,
+      "nodeid": 24,
       "sensorid": [
         2,
         3
       ]
     },
 	    {
-      "id": "node22light",
-      "name": "Wohnzimmer",
+      "id": "node24light",
+      "name": "Licht",
       "class": "MySensorsLight",
-      "nodeid": 20,
+      "nodeid": 24,
       "batterySensor": false,
       "sensorid": 4
     },
 	{
-      "id": "node22pir",
-      "name": "Wohnzimmer",
+      "id": "node24pir",
+      "name": "Bewegung",
       "class": "MySensorsPIR",
-      "nodeid": 20,
+      "nodeid": 24,
       "sensorid": 1,
-      "resetTime": 30000
+      "autoReset": false
     }
+	
+	
+	{
+          "class": "MySensorsMulti",
+          "id": "node24",
+          "name": "Schlafzimmer",
+          "attributes": [
+            {
+              "name": "Temperatur",
+              "nodeid": 24,
+              "sensorid": 2,
+              "type": "float",
+              "acronym": "Temp.",
+              "unit": "°C"
+            },
+            {
+              "name": "Luftfeuchtigkeit",
+              "nodeid": 24,
+              "sensorid": 3,
+              "type": "round",
+              "acronym": "Luft",
+              "unit": "%"
+            },
+			{
+              "name": "Licht",
+              "nodeid": 24,
+              "sensorid": 4,
+              "type": "round",
+              "acronym": "Licht",
+              "unit": "%"
+            },
+            {
+              "name": "Bewegung",
+              "nodeid": 24,
+              "sensorid": 1,
+              "type": "boolean",
+              "booleanlabels": [
+                "Ja",
+                "Nein"
+              ],
+              "acronym": "Bewegung"
+            },
+            {
+              "name": "Batterie",
+              "nodeid": 24,
+              "type": "battery",
+              "acronym": "Batterie",
+              "unit": "%"
+            }
+          ]
+        }

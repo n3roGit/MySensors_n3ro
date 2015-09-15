@@ -1,0 +1,1 @@
+In file "MyConfig.h" change "#define RF24_PA_LEVEL_GW   RF24_PA_LOW" to "#define RF24_PA_LEVEL_GW   RF24_PA_MAX"

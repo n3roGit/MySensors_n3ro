@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include <DHT.h>
 
-#define NODE_ID 24                      // ID of node
+#define NODE_ID 26                      // ID of node
 #define SLEEP_TIME 300000                 // Sleep time between reports (in milliseconds)
 
 #define CHILD_ID_PIR 1                   // ID of the sensor PIR

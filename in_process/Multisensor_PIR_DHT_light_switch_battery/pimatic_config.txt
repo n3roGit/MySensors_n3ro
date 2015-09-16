@@ -1,85 +1,94 @@
-    {
-      "id": "node20switch",
-      "name": "node20switch",
-      "class": "MySensorsSwitch",
-      "nodeid": 20,
-      "sensorid": 5
-    },
-	    {
-      "id": "node20dht",
-      "name": "node20dht",
-      "class": "MySensorsDHT",
-      "batterySensor": false,
-      "nodeid": 20,
-      "sensorid": [
-        2,
-        3
-      ]
-    },
-	    {
-      "id": "node20light",
-      "name": "node20light",
-      "class": "MySensorsLight",
-      "nodeid": 20,
-      "batterySensor": false,
-      "sensorid": 4
-    },
+{
+  "id": "node20switch",
+  "name": "node20switch",
+  "class": "MySensorsSwitch",
+  "nodeid": 20,
+  "sensorid": 5
+},
 	{
-      "id": "node20pir",
-      "name": "node20pir",
-      "class": "MySensorsPIR",
-      "nodeid": 20,
-      "sensorid": 1,
-	  "batterySensor": false,
-      "resetTime": 30000
-    },
-	  {
-      "id": "node20gas",
-      "name": "node20gas",
-      "class": "MySensorsGas",
-      "nodeid": 20,
-      "batterySensor": false,
-      "sensorid": 6
-  },
+  "id": "node20dht",
+  "name": "node20dht",
+  "class": "MySensorsDHT",
+  "batterySensor": false,
+  "nodeid": 20,
+  "sensorid": [
+	2,
+	3
+  ]
+},
+	{
+  "id": "node20light",
+  "name": "node20light",
+  "class": "MySensorsLight",
+  "nodeid": 20,
+  "batterySensor": false,
+  "sensorid": 4
+},
+{
+  "id": "node20pir",
+  "name": "node20pir",
+  "class": "MySensorsPIR",
+  "nodeid": 20,
+  "sensorid": 1,
+  "batterySensor": false,
+  "resetTime": 30000
+},
   {
-      "id": "node20",
-      "name": "Küche ALL",
-      "class": "VariablesDevice",
-      "variables": [
-        {
-          "name": "Temperatur",
-          "expression": "$node20dht.temperature",
-          "unit": "°C",
-          "label": "Temperatur",
-          "type": "number"
-        },
-        {
-          "name": "Luftfeuchtigkeit",
-          "expression": "$node20dht.humidity",
-          "unit": "%",
-          "label": "Luftfeuchtigkeit",
-          "type": "number"
-        },
-        {
-          "name": "Licht",
-          "expression": "$node20light.light",
-          "unit": "%",
-          "label": "Licht",
-          "type": "number"
-        },
-		{
-          "name": "Gas",
-          "expression": "$node20gas.gas",
-          "unit": "%",
-          "label": "Gas",
-          "type": "number"
-        },
-        {
-          "name": "PIR",
-          "expression": "$node20pir.presence",
-          "unit": "",
-          "label": "PIR",
-          "type": "string"
+  "id": "node20gas",
+  "name": "node20gas",
+  "class": "MySensorsGas",
+  "nodeid": 20,
+  "batterySensor": false,
+  "sensorid": 6
+}
+
+{
+          "class": "MySensorsMulti",
+          "id": "node20",
+          "name": "Küche",
+          "attributes": [
+            {
+              "name": "Temperatur",
+              "nodeid": 20,
+              "sensorid": 3,
+              "type": "float",
+              "acronym": "Temp.",
+              "unit": "°C"
+            },
+            {
+              "name": "Luftfeuchtigkeit",
+              "nodeid": 20,
+              "sensorid": 2,
+              "type": "round",
+              "acronym": "Luft",
+              "unit": "%"
+            },
+			{
+              "name": "Licht",
+              "nodeid": 20,
+              "sensorid": 4,
+              "type": "round",
+              "acronym": "Licht",
+              "unit": "%"
+            },
+			{
+              "name": "Rauch",
+              "nodeid": 20,
+              "sensorid": 6,
+              "type": "round",
+              "acronym": "Rauch",
+              "unit": "ppm"
+            },
+            {
+              "name": "Bewegung",
+              "nodeid": 20,
+              "sensorid": 1,
+              "type": "boolean",
+              "booleanlabels": [
+                "Ja",
+                "Nein"
+              ],
+              "acronym": "Bewegung"
+            }
+          ]
         }
-      ]
-    }

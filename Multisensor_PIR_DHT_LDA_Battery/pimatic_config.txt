@@ -35,7 +35,7 @@
             {
               "name": "Temperatur",
               "nodeid": 24,
-              "sensorid": 2,
+              "sensorid": 3,
               "type": "float",
               "acronym": "Temp.",
               "unit": "°C"
@@ -43,7 +43,7 @@
             {
               "name": "Luftfeuchtigkeit",
               "nodeid": 24,
-              "sensorid": 3,
+              "sensorid": 2,
               "type": "round",
               "acronym": "Luft",
               "unit": "%"

@@ -4,7 +4,10 @@
 #include <DHT.h>
 
 #define NODE_ID 26                      // ID of node
-#define SLEEP_TIME 300000                 // Sleep time between reports (in milliseconds)
+#define SLEEP_TIME 1800000                 // Sleep time between reports (in milliseconds)
+// 1h = 3600000
+// 30m = 1800000
+// 15m = 900000
 
 #define CHILD_ID_PIR 1                   // ID of the sensor PIR
 #define CHILD_ID_HUM 2                   // ID of the sensor HUM
@@ -16,7 +19,7 @@
 #define LIGHT_SENSOR_ANALOG_PIN 0        // LDR pin
 #define LED_PIN A1                       // LED connected PIN 
 #define STEPUP_PIN 6                     // StepUp Transistor 
-#define STEPUP_PIN2 7                     // StepUp Transistor
+#define STEPUP_PIN2 7                    // StepUp Transistor
 
 #define MIN_V 1900 // empty voltage (0%)
 #define MAX_V 3200 // full voltage (100%)
@@ -37,7 +40,7 @@ boolean metric = true;
 int oldBatteryPcnt;
 int lastLightLevel;
 int sentValue;
-int repeat = 10;
+int repeatSending = 10;
 
 void setup()
 {
@@ -51,12 +54,19 @@ void setup()
   gw.present(CHILD_ID_TEMP, S_TEMP);
   gw.present(CHILD_ID_LIGHT, S_LIGHT_LEVEL);
 
+  // PIR PINS
   pinMode(PIR_SENSOR_DIGITAL, INPUT);
-  //digitalWrite(PIR_SENSOR_DIGITAL, HIGH);
+  //digitalWrite(PIR_SENSOR_DIGITAL, HIGH); //Use this if no external pullup is used for PIR
 
+  //DHT PINS
   dht.setup(HUMIDITY_SENSOR_DIGITAL_PIN);
   
-  led(true,3,100);
+  //STEPUP PINS
+  pinMode(STEPUP_PIN, OUTPUT);       // sets the pin as output
+  pinMode(STEPUP_PIN2, OUTPUT);      // sets the pin as output
+  
+  //STARTUP BLINK
+  led(true,5,200);
   stepup(false);
 }
 
@@ -95,7 +105,7 @@ void sendPir() // Get value of PIR
   int value = digitalRead(PIR_SENSOR_DIGITAL); // Get value of PIR
   if (value != sentValue) { // If status of PIR has changed
     //gw.send(msgPir.set(value == HIGH ? 1 : 0)); // Send PIR status to gateway
-    resend((msgPir.set(value == HIGH ? 1 : 0)),repeat);
+    resend((msgPir.set(value == HIGH ? 1 : 0)),repeatSending);
     sentValue = value;
   }
   Serial.print("---------- PIR: ");
@@ -113,7 +123,7 @@ void sendTemp() // Get temperature
   } else {
     if (temperature != lastTemp) {
       //gw.send(msgTemp.set(temperature, 1));
-      resend((msgTemp.set(temperature, 1)),repeat);
+      resend((msgTemp.set(temperature, 1)),repeatSending);
       lastTemp = temperature;
     }
     Serial.print("---------- Temp: ");
@@ -131,7 +141,7 @@ void sendHum() // Get humidity
   } else {
     if (humidity != lastHum) {
       //gw.send(msgHum.set(humidity, 1));
-      resend((msgHum.set(humidity, 1)),repeat);
+      resend((msgHum.set(humidity, 1)),repeatSending);
       lastHum = humidity;
     }
     Serial.print("---------- Humidity: ");
@@ -145,7 +155,7 @@ void sendLight() // Get light level
   int lightLevel = (1023 - analogRead(LIGHT_SENSOR_ANALOG_PIN)) / 10.23;
   if (lightLevel != lastLightLevel) {
     //gw.send(msgLight.set(lightLevel));
-    resend((msgLight.set(lightLevel)),repeat);
+    resend((msgLight.set(lightLevel)),repeatSending);
     lastLightLevel = lightLevel;
   }
   Serial.print("---------- Light: ");
@@ -207,8 +217,6 @@ void resend(MyMessage &msg, int repeats)
 
 void stepup(boolean onoff)
 {
-  pinMode(STEPUP_PIN, OUTPUT);      // sets the pin as output
-  pinMode(STEPUP_PIN2, OUTPUT);      // sets the pin as output
   Serial.print("---------- StepUp: ");
   if (onoff == true)
   {
@@ -220,7 +228,7 @@ void stepup(boolean onoff)
   {
     Serial.println("OFF");
     digitalWrite(STEPUP_PIN, LOW);       // turn off
-    digitalWrite(STEPUP_PIN2, HIGH);       // turn off
+    digitalWrite(STEPUP_PIN2, HIGH);     // turn off
   }
 }
 

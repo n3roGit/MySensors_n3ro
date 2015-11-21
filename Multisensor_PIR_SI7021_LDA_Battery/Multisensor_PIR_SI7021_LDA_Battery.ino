@@ -33,7 +33,7 @@ MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
 MyMessage msgLight(CHILD_ID_LIGHT, V_LIGHT_LEVEL);
 
 // testing
-SI7021 SI7021;
+SI7021 si7021;
 
 
 float lastTemp;
@@ -48,7 +48,7 @@ void setup()
 {
   gw.begin(NULL, NODE_ID, false);
 
-  gw.sendSketchInfo("PIR,SI7021,Light", "1.0");
+  gw.sendSketchInfo("PIR,si7021,Light", "1.0");
   // Register all sensors to gateway (they will be created as child devices)
   gw.present(CHILD_ID_PIR, S_MOTION);
   gw.present(CHILD_ID_HUM, S_HUM);
@@ -59,8 +59,8 @@ void setup()
   pinMode(PIR_SENSOR_DIGITAL, INPUT);
   //digitalWrite(PIR_SENSOR_DIGITAL, HIGH); //Use this if no external pullup is used for PIR
 
-  //SI7021 PINS
-  SI7021.begin();
+  //si7021 PINS
+  si7021.begin();
   
   //STEPUP PINS
   pinMode(STEPUP_PIN, OUTPUT);       // sets the pin as output
@@ -116,7 +116,7 @@ void sendPir() // Get value of PIR
 
 void sendTemp() // Get temperature
 {
-  float temperature = SI7021.getCelsiusHundredths();
+  float temperature = si7021.getCelsiusHundredths();
   if (isnan(temperature)) {
     Serial.println("Failed reading temperature from DHT");
   } else {
@@ -133,7 +133,7 @@ void sendTemp() // Get temperature
 
 void sendHum() // Get humidity
 {
-  float humidity = SI7021.getHumidityPercent();
+  float humidity = si7021.getHumidityPercent();
   if (isnan(humidity)) {
     Serial.println("Failed reading humidity from DHT");
   } else {

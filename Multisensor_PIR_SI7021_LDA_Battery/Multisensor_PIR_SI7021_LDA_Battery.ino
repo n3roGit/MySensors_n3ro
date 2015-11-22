@@ -4,7 +4,7 @@
 #include <Wire.h>
 #include <SI7021.h>
 
-#define NODE_ID 26                      // ID of node
+#define NODE_ID 25                      // ID of node
 #define SLEEP_TIME 1800000                 // Sleep time between reports (in milliseconds)
 // 1h = 3600000
 // 30m = 1800000
@@ -123,6 +123,7 @@ void sendPir() // Get value of PIR
 void sendTemp() // Get temperature
 {
   float temperature = si7021.getCelsiusHundredths();
+  temperature = temperature / 100;
   if (isnan(temperature)) {
     Serial.println("Failed reading temperature from si7021");
   } else {

@@ -10,6 +10,9 @@
 // 30m = 1800000
 // 15m = 900000
 
+//Node interrupt wakeup modes
+#define wakeUpMode RISING //RISING, CHANGE or FALLING
+
 #define CHILD_ID_PIR 1                   // ID of the sensor PIR
 #define CHILD_ID_HUM 2                   // ID of the sensor HUM
 #define CHILD_ID_TEMP 3                  // ID of the sensor TEMP
@@ -19,8 +22,11 @@
 #define HUMIDITY_SENSOR_DIGITAL_PIN 4    // DHT pin
 #define LIGHT_SENSOR_ANALOG_PIN 0        // LDR pin
 #define LED_PIN A1                       // LED connected PIN 
-#define STEPUP_PIN 6                     // StepUp Transistor 
-#define STEPUP_PIN2 7                    // StepUp Transistor
+//#define STEPUP_PIN 6                     // StepUp Transistor 
+//#define STEPUP_PIN2 7                    // StepUp Transistor
+
+// testing
+SI7021 si7021;
 
 #define MIN_V 1900 // empty voltage (0%)
 #define MAX_V 3200 // full voltage (100%)
@@ -32,17 +38,19 @@ MyMessage msgHum(CHILD_ID_HUM, V_HUM);
 MyMessage msgTemp(CHILD_ID_TEMP, V_TEMP);
 MyMessage msgLight(CHILD_ID_LIGHT, V_LIGHT_LEVEL);
 
-// testing
-SI7021 si7021;
+
+
+
 
 
 float lastTemp;
 float lastHum;
-boolean metric = true;
+//boolean metric = true;
 int oldBatteryPcnt;
 int lastLightLevel;
-int sentValue;
+int lastPIR;
 int repeatSending = 10;
+
 
 void setup()
 {
@@ -63,13 +71,11 @@ void setup()
   si7021.begin();
   
   //STEPUP PINS
-  pinMode(STEPUP_PIN, OUTPUT);       // sets the pin as output
-  pinMode(STEPUP_PIN2, OUTPUT);      // sets the pin as output
+  //pinMode(STEPUP_PIN, OUTPUT);       // sets the pin as output
+  //pinMode(STEPUP_PIN2, OUTPUT);      // sets the pin as output
   
   //STARTUP BLINK
-  led(true,5,200);
-  
-  
+  led(true,5,200); 
 }
 
 void loop()
@@ -83,7 +89,7 @@ void loop()
 
   Serial.println("Going to sleep...");
   Serial.println("");
-  gw.sleep(PIR_SENSOR_DIGITAL - 2, RISING, SLEEP_TIME);
+  gw.sleep(PIR_SENSOR_DIGITAL - 2, wakeUpMode, SLEEP_TIME);
 }
 
 
@@ -102,14 +108,14 @@ void sendBattery() // Measure battery
 
 void sendPir() // Get value of PIR
 {
-  int value = digitalRead(PIR_SENSOR_DIGITAL); // Get value of PIR
-  if (value != sentValue) { // If status of PIR has changed
-    //gw.send(msgPir.set(value == HIGH ? 1 : 0)); // Send PIR status to gateway
-    resend((msgPir.set(value == HIGH ? 1 : 0)),repeatSending);
-    sentValue = value;
+  int pir = digitalRead(PIR_SENSOR_DIGITAL); // Get value of PIR
+  if (pir != lastPIR) { // If status of PIR has changed
+    //gw.send(msgPir.set(pir == HIGH ? 1 : 0)); // Send PIR status to gateway
+    resend((msgPir.set(pir == HIGH ? 1 : 0)),repeatSending);
+    lastPIR = pir;
   }
   Serial.print("---------- PIR: ");
-  Serial.println(value ? "tripped" : "not tripped");
+  Serial.println(pir ? "tripped" : "not tripped");
 }
 
 
@@ -118,7 +124,7 @@ void sendTemp() // Get temperature
 {
   float temperature = si7021.getCelsiusHundredths();
   if (isnan(temperature)) {
-    Serial.println("Failed reading temperature from DHT");
+    Serial.println("Failed reading temperature from si7021");
   } else {
     if (temperature != lastTemp) {
       //gw.send(msgTemp.set(temperature, 1));
@@ -135,7 +141,7 @@ void sendHum() // Get humidity
 {
   float humidity = si7021.getHumidityPercent();
   if (isnan(humidity)) {
-    Serial.println("Failed reading humidity from DHT");
+    Serial.println("Failed reading humidity from si7021");
   } else {
     if (humidity != lastHum) {
       //gw.send(msgHum.set(humidity, 1));

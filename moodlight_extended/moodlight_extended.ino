@@ -27,7 +27,7 @@ MyMessage dimmerMsg(0, V_DIMMER);
 
 void setup() {
   strip.begin();
-  strip.setBrightness(10);
+  //strip.setBrightness(10);
   strip.show();
   
    
@@ -37,6 +37,7 @@ void setup() {
   gw.present(0, S_CUSTOM);
 
   // colorChange(RED, GREEN, BUE, FADE)
+  /*
   colorChange(255, 255, 255, true); // white
   colorChange(255, 0, 0, true); // red
   colorChange(0, 255, 0, true); // green
@@ -45,7 +46,8 @@ void setup() {
   colorChange(255, 0, 255, true); 
   colorChange(0, 255, 255, true); 
   colorChange(255, 0, 255, true);
-  colorChange(0, 0, 0, true);     // Off
+  */
+  
   /*colorWipe(strip.Color(0,0,0), 25); // Black
   colorWipe(strip.Color(64, 0, 0), 100); // Red
   colorWipe(strip.Color(0, 64, 0), 100); // Green
@@ -56,7 +58,10 @@ void setup() {
   colorWipe(strip.Color(0,0,0), 100); // Black
   rainbowCycle(15);
   colorWipe(strip.Color(0,0,0), 100); // Black
-  colorWave(30);*/
+  colorWave(75);
+  */
+  rainbowCycle(3);
+  colorChange(0, 0, 0, true);     // Off
 }
 
 void loop() {

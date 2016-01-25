@@ -19,22 +19,24 @@ int Bold;
 
 
 int currentLevel = 0; // Dimlevel
-long RGB_values[3] = {0, 0, 0}; // Colors
-int dimmSpeed = 4;
+long RGB_values[3] = {255, 255, 255}; // Colors
+int dimmSpeed = 1;
 
 MySensor gw;
 MyMessage dimmerMsg(0, V_DIMMER);
 
+
 void setup() {
   strip.begin();
-  //strip.setBrightness(10);
+  //strip.setBrightness(25);
   strip.show();
   
    
 
   gw.begin(incomingMessage, NODE_ID, false);
-  gw.sendSketchInfo("Mood Light", "3.0");
+  gw.sendSketchInfo("Mood Light extended", "1.0");
   gw.present(0, S_CUSTOM);
+  gw.present(0, S_COVER);
 
   // colorChange(RED, GREEN, BUE, FADE)
   /*
@@ -60,7 +62,7 @@ void setup() {
   colorWipe(strip.Color(0,0,0), 100); // Black
   colorWave(75);
   */
-  rainbowCycle(3);
+  rainbowCycle(1);
   colorChange(0, 0, 0, true);     // Off
 }
 
@@ -69,9 +71,26 @@ void loop() {
 }
 
 void incomingMessage(const MyMessage &message) {
-
+  
+  if (message.type == V_UP) {
+    Serial.println("opening up covers");
+    message.getBool();
+  
+   } 
+   else if (message.type == V_DOWN) {
+     Serial.println("closing up covers");
+     message.getBool();
+  
+   } 
+   else if (message.type == V_STOP) {
+     Serial.println("stopping covers");
+     message.getBool();
+  
+   }
+   
   if (message.type == V_VAR1) {
     String hexstring = message.getString();
+    
 
     // Check if contains hex character
 
@@ -109,7 +128,7 @@ void incomingMessage(const MyMessage &message) {
     Serial.print("Dimming to ");
     Serial.println(reqLevel);
     fadeToLevel(reqLevel);
-    
+    colorChange(R, G, B, true);
   }
 
 }

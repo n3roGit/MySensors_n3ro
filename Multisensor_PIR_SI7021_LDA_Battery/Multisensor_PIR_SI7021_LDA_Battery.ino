@@ -24,7 +24,6 @@
 #define FORCE_TRANSMIT_CYCLE 36  // 5min*12=1/hour, 5min*36=1/3hour 
 #define BATTERY_REPORT_CYCLE 2880   // Once per 5min   =>   12*24*7 = 2016 (one report/week)
 
-
 //Node interrupt wakeup modes
 #define wakeUpMode RISING //RISING, CHANGE or FALLING
 
@@ -34,21 +33,18 @@
 #define CHILD_ID_LIGHT 4                 // ID of the sensor LIGHT
 
 #define PIR_SENSOR_DIGITAL 3             // PIR pin
-//#define HUMIDITY_SENSOR_DIGITAL_PIN 4    // DHT pin
 #define LIGHT_SENSOR_ANALOG_PIN 0        // LDR pin
 #define LED_PIN A1                       // LED connected PIN 
-//#define STEPUP_PIN 6                     // StepUp Transistor 
-//#define STEPUP_PIN2 7                    // StepUp Transistor
-
 
 // Temp and Hum
 SI7021 si7021;
 #define HUMI_TRANSMIT_THRESHOLD 3.0  // THRESHOLD tells how much the value should have changed since last time it was transmitted.
 #define TEMP_TRANSMIT_THRESHOLD 0.5
-#define AVERAGES 2
+
 
 #define MIN_V 1900 // empty voltage (0%)
 #define MAX_V 3200 // full voltage (100%)
+#define BAT_TRANSMIT_THRESHOLD 3
 
 MySensor gw;
 // Initialize Variables
@@ -77,7 +73,10 @@ void setup()
 {
   DEBUG_SERIAL(115200);    
   DEBUG_PRINTLN("Serial started");
-  
+  DEBUG_PRINT("Node: ");
+  DEBUG_PRINTLN(NODE_ID);
+  DEBUG_PRINT("Sleep: ");
+  DEBUG_PRINTLN(SLEEP_TIME);
   DEBUG_PRINT("Voltage: ");
   DEBUG_PRINT(readVcc()); 
   DEBUG_PRINTLN(" mV");
@@ -127,7 +126,6 @@ void loop()
   
   DEBUG_PRINTLN("Going to sleep...");
   DEBUG_PRINTLN("");
-  gw.sleep(5000);
   gw.sleep(PIR_SENSOR_DIGITAL - 2, wakeUpMode, SLEEP_TIME);
 }
 
@@ -136,12 +134,13 @@ void sendBattery() // Measure battery
 {
   bool force = false;
   int batteryPcnt = min(map(readVcc(), MIN_V, MAX_V, 0, 100), 100);
+  float diffbatteryPcnt = abs(oldBatteryPcnt - batteryPcnt);
   if (batteryReportCounter >= BATTERY_REPORT_CYCLE) {
     force = true;
     batteryReportCounter = 0;
     }
-  if (batteryPcnt != oldBatteryPcnt or force == true) {
-    DEBUG_PRINT(force ? "forced " : "normal ");
+  if (diffbatteryPcnt > BAT_TRANSMIT_THRESHOLD or force == true) {
+    DEBUG_PRINT(force ? "F " : "S ");
     gw.sendBatteryLevel(batteryPcnt); // Send battery percentage
     oldBatteryPcnt = batteryPcnt;
   }
@@ -255,7 +254,7 @@ void resend(MyMessage &msg, int repeats, bool force)
   boolean sendOK = false;
 
   while ((sendOK == false) and (repeat < repeats)) {
-    DEBUG_PRINT(force ? "forced " : "normal ");
+    DEBUG_PRINT(force ? "F " : "S ");
     if (gw.send(msg)) {
       sendOK = true;
     } else {

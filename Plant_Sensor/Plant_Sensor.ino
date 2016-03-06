@@ -42,8 +42,7 @@ void setup()
   DEBUG_PRINT("Voltage: ");
   DEBUG_PRINT(readVcc()); 
   DEBUG_PRINTLN(" mV");
-  DEBUG_PRINTLN(" uigougogouzgo");
-  
+ 
   gw.begin(NULL, NODE_ID, false);
 
   // Send the sketch version information to the gateway and Controller

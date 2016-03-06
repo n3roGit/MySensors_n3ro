@@ -21,6 +21,8 @@ int Bold;
 int currentLevel = 0; // Dimlevel
 long RGB_values[3] = {255, 255, 255}; // Colors
 int dimmSpeed = 1;
+unsigned long interval=1000;  // the time we need to wait
+unsigned long previousMillis=0;
 
 MySensor gw;
 MyMessage dimmerMsg(0, V_DIMMER);
@@ -62,7 +64,8 @@ void setup() {
   colorWipe(strip.Color(0,0,0), 100); // Black
   colorWave(75);
   */
-  rainbowCycle(1);
+  //rainbowCycle(1);
+  rainbowCycle();
   colorChange(0, 0, 0, true);     // Off
 }
 
@@ -211,7 +214,7 @@ void rainbow(uint8_t wait) {
 }
 
 // Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(uint8_t wait) {
+void rainbowCycle_delay(uint8_t wait) {
   uint16_t i, j;
 
   for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
@@ -220,6 +223,15 @@ void rainbowCycle(uint8_t wait) {
     }
     strip.show();
     delay(wait);
+  }
+}
+
+void rainbowCycle() {
+  Serial.println("Rainbow Cycle loop");
+  uint16_t i, j;
+  for (j = 0; j < 256 * 5; j++) { // 5 cycles of all colors on wheel
+    for (i = 0; i < strip.numPixels(); i++) { strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));}
+    strip.show();
   }
 }
 

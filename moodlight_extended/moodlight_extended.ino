@@ -3,7 +3,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #define LED_PIN 4
-#define NODE_ID 10
+#define NODE_ID 30
 int LEDCount = 24;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LEDCount, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -20,12 +20,12 @@ int Bold;
 
 int currentLevel = 0; // Dimlevel
 long RGB_values[3] = {255, 255, 255}; // Colors
-int dimmSpeed = 1;
+int dimmSpeed = 3;
 unsigned long interval=1000;  // the time we need to wait
 unsigned long previousMillis=0;
 
 MySensor gw;
-MyMessage dimmerMsg(0, V_DIMMER);
+MyMessage dimmerMsg(0, V_PERCENTAGE);
 
 
 void setup() {
@@ -120,7 +120,7 @@ void incomingMessage(const MyMessage &message) {
     Serial.println(RGB_values[2]);
   }
 
-  if (message.type == V_DIMMER) {
+  if (message.type == V_PERCENTAGE) {
     // Get the dimlevel
     int reqLevel = atoi( message.data );
     // Clip incoming level to valid range of 0 to 100
